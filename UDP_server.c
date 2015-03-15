@@ -62,20 +62,16 @@ int boucleServeurUDP(int s,int (*traitement)(unsigned char *,int)){
 
 int affichage(unsigned char * message, int nboctets){
 
-	//int i;
-	//for(i=0;i<nboctets;i++){
-		printf("%s",message);
-	//}
-	
+	printf("%s",message);	
 	return 0;
 }
 
 int main(int argc,char *argv[]){
 
-	char *service="4000";
+	char *service="5000";
 
 	int (*traitement)(unsigned char *,int);
-    traitement = &affichage;
+	traitement = &affichage;
 
 	int s=initialisationSocketUDP(service);
 	boucleServeurUDP(s,traitement);

@@ -49,7 +49,7 @@ int main(int argc,char *argv[]){
 	}
 	char *hote=argv[1];
 	char *message=argv[2];
-	char *service="4000";
+	char *service="5000";
 	messageUDP(hote,service,(unsigned char *)message,strlen(message));
 	return 0;
 
