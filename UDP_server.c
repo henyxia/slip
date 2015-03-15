@@ -53,6 +53,7 @@ int boucleServeurUDP(int s,int (*traitement)(unsigned char *,int)){
 		socklen_t taille=sizeof(adresse);
 		unsigned char message[MAX_UDP_MESSAGE];
 		int nboctets=recvfrom(s,message,MAX_UDP_MESSAGE,0,(struct sockaddr *)&adresse,&taille);
+		message[nboctets]='\0';
 		if(nboctets<0) return -1;
 		if(traitement(message,nboctets)<0) break;
 	}
@@ -62,7 +63,7 @@ int boucleServeurUDP(int s,int (*traitement)(unsigned char *,int)){
 
 int affichage(unsigned char * message, int nboctets){
 
-	printf("%s",message);	
+	printf("%s\n",message);	
 	return 0;
 }
 
@@ -70,11 +71,8 @@ int main(int argc,char *argv[]){
 
 	char *service="5000";
 
-	int (*traitement)(unsigned char *,int);
-	traitement = &affichage;
-
 	int s=initialisationSocketUDP(service);
-	boucleServeurUDP(s,traitement);
+	boucleServeurUDP(s,affichage);
 	return 0;
 
 }
