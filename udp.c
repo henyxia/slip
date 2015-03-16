@@ -6,12 +6,20 @@
 #include <netdb.h>
 #include <string.h>
 
-#define MAX_UDP_MESSAGE 1024
+#include "udp.h"
 
-int affichage(unsigned char * message, int nboctets);//prototype
+int affichage(unsigned char * message, int nboctets)
+{
+#ifdef __UDP_DEBUG__
+	printf("%s\n",message);
+#endif
+	return 0;
+}
 
-int initialisationSocketUDP(char *service){
+int initUDPServer()
+{
 
+	char service[] = UDP_PORT;
 	struct addrinfo precisions,*resultat;
 	int statut;
 	int s;
@@ -46,34 +54,21 @@ int initialisationSocketUDP(char *service){
 
 }
 
-int boucleServeurUDP(int s,int (*traitement)(unsigned char *,int)){
-
-	while(1){
+void* processUDPServer(SOCKET sServ)
+{
+	while(1)
+	{
 		struct sockaddr_storage adresse;
 		socklen_t taille=sizeof(adresse);
-		unsigned char message[MAX_UDP_MESSAGE];
-		int nboctets=recvfrom(s,message,MAX_UDP_MESSAGE,0,(struct sockaddr *)&adresse,&taille);
+		unsigned char message[MSG_LENGTH];
+		int nboctets=recvfrom(sServ,message,MSG_LENGTH,0,(struct sockaddr *)&adresse,&taille);
 		message[nboctets]='\0';
-		if(nboctets<0) return -1;
-		if(traitement(message,nboctets)<0) break;
+		if(nboctets<0)
+			return NULL;
+		if(affichage(message,nboctets)<0)
+			break;
 	}
-	return 0;
 
-}
-
-int affichage(unsigned char * message, int nboctets){
-
-	printf("%s\n",message);	
-	return 0;
-}
-
-int main(int argc,char *argv[]){
-
-	char *service="5000";
-
-	int s=initialisationSocketUDP(service);
-	boucleServeurUDP(s,affichage);
-	return 0;
-
+	return NULL;
 }
 
