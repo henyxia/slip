@@ -7,18 +7,16 @@
 #include <string.h>
 
 #include "udp.h"
+#include "teams.h"
 
-int affichage(unsigned char * message, int nboctets)
+int processPacket(unsigned char * message)
 {
-#ifdef __UDP_DEBUG__
-	printf("%s\n",message);
-#endif
+	printf("Message recieve from team : %d aka %s\n", message[0] >> 4, teams[message[0] >> 4]);
 	return 0;
 }
 
 int initUDPServer()
 {
-
 	char service[] = UDP_PORT;
 	struct addrinfo precisions,*resultat;
 	int statut;
@@ -58,15 +56,14 @@ void* processUDPServer(SOCKET sServ)
 {
 	while(1)
 	{
+		printf("Waiting for events\n");
 		struct sockaddr_storage adresse;
 		socklen_t taille=sizeof(adresse);
 		unsigned char message[MSG_LENGTH];
 		int nboctets=recvfrom(sServ,message,MSG_LENGTH,0,(struct sockaddr *)&adresse,&taille);
 		message[nboctets]='\0';
-		if(nboctets<0)
-			return NULL;
-		if(affichage(message,nboctets)<0)
-			break;
+		if(nboctets==MSG_LENGTH)
+			processPacket(message);
 	}
 
 	return NULL;
