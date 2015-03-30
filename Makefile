@@ -3,7 +3,7 @@ CC_FLAGS=-c -Wall -Werror -std=gnu99 -g
 CC_LIBS=
 INCLUDES=
 
-SOURCES=main.c udp.c
+SOURCES=main.c udp.c parity.c
 OBJECTS=$(SOURCES:.c=.o)
 OUTPUT=slip
 

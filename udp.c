@@ -8,10 +8,40 @@
 
 #include "udp.h"
 #include "teams.h"
+#include "parity.h"
 
 int processPacket(unsigned char * message)
 {
-	printf("Message recieve from team : %d aka %s\n", message[0] >> 4, teams[message[0] >> 4]);
+	int team = message[0] >> 4;
+	if(team < 0 || team >= MAX_TEAMS)
+	{
+		printf("\tWrong team number");
+		return -1;
+	}
+	printf("Team %d (aka %s)\n", message[0] >> 4, teams[message[0] >> 4]);
+	if(checkParity(message[1] + ((message[0] & 0x08) >> 3)))
+	{
+		printf(" \u21B3 X Parity error (X:%02x p:%02x t:%02x)\n", message[1], ((message[0] & 0x08) >> 3), (message[1] + ((message[0] & 0x08) >> 3)));
+		return -2;
+	}
+	if(checkParity(message[2] + ((message[0] & 0x04) >> 2)))
+	{
+		printf(" \u21B3 Y Parity error\n");
+		return -3;
+	}
+	if(checkParity(message[3] + ((message[0] & 0x02) >> 1)))
+	{
+		printf(" \u21B3 Z Parity error\n");
+		return -4;
+	}
+	if(checkParity(message[4] + (message[0] & 0x01)))
+	{
+		printf(" \u21B3 T Parity error\n");
+		return -5;
+	}
+
+	printf(" \u21B3 X:%04d Y:%04d Z:%04d\n", message[1], message[2], message[3]);
+	printf(" \u21B3 Temp: %02d\u2103\n", message[4]);
 	return 0;
 }
 

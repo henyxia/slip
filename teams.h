@@ -1,7 +1,9 @@
 #ifndef	__TEAMS_H__
 #define	__TEAMS_H__
 
-const char teams[11][25] = {"Jean & Flavien",
+#define	MAX_TEAMS	11
+
+const char teams[MAX_TEAMS][25] = {"Jean & Flavien",
 	"Cyril",
 	"Kevin",
 	"Valentin & Alexander",
