@@ -102,8 +102,11 @@ int initUDPServer()
 
 }
 
-void* processUDPServer(SOCKET sServ)
+void* processUDPServer(void* arg)
 {
+	printf("Freeze ?\n");
+	SOCKET sServ = *((SOCKET*) arg);
+	printf("UDP Socket Internal %d\n", sServ);
 	while(1)
 	{
 		printf("Waiting for events\n");

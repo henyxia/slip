@@ -1,19 +1,36 @@
-CC=gcc
-CC_FLAGS=-c -Wall -Werror -std=gnu99 -g
-CC_LIBS=
-INCLUDES=
+#
+# Makefile du jeu des chaises musicales
+#
 
-SOURCES=main.c udp.c parity.c
-OBJECTS=$(SOURCES:.c=.o)
-OUTPUT=slip
+#
+# Constantes pour la compilation des programmes
+#
 
-all: $(SOURCES) $(OUTPUT)
+export CC = gcc
+export LD = gcc
+export CLIB = ar cq
+export CFLAGS = -g -Wall -DDEBUG
 
-$(OUTPUT): $(OBJECTS)
-	$(CC) $(OBJECTS) $(CC_LIBS) -o $@
+#
+# Constantes liees au projet
+#
 
-%.o: %.c
-	$(CC) $(INCLUDES) $(CC_FLAGS) $< -o $@
+DIRS=Communication Threads Serveur
 
-clear:
-	rm -f $(OUTPUT) $(OBJECTS)
+#
+# La cible generale
+#
+
+all: $(patsubst %, _dir_%, $(DIRS))
+
+$(patsubst %,_dir_%,$(DIRS)):
+	cd $(patsubst _dir_%,%,$@) && make
+
+#
+# La cible de nettoyage
+#
+
+clean: $(patsubst %, _clean_%, $(DIRS))
+
+$(patsubst %,_clean_%,$(DIRS)):
+	cd $(patsubst _clean_%,%,$@) && make clean

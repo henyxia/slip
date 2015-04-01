@@ -6,7 +6,7 @@
 #define	MSG_LENGTH	5
 #define	UDP_PORT	"12345"
 
-int	initUDPServer();
-void* processUDPServer(SOCKET);
+int		initUDPServer();
+void*	processUDPServer(void*);
 
 #endif
