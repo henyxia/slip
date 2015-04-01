@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 #include "serial.h"
-//#include "ethernet.h"
+#include "ethernet.h"
 //#include "socket.h"
 #include "serial.h"
 #include "analog.h"
