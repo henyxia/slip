@@ -2,6 +2,7 @@
 
 #include <avr/io.h>
 #include <stdio.h>
+
 #include "analog.h"
 
 void ad_init(unsigned char channel)   

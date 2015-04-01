@@ -7,6 +7,7 @@
 //#include "socket.h"
 #include "serial.h"
 #include "analog.h"
+#include "parity.h"
 
 #define MAC_SIZE	6
 #define IPV4_SIZE	4
@@ -21,8 +22,8 @@ void datagrammeIP(uint8_t data [],int x, int y, int z, int t, int id)
 	data[4] = id;
 	
 	//UDP
-	//data[5] = 
-	//data[6] = 
+	data[5] = 0x00;		//Checksum UDP
+	data[6] = 0x00;		//which is not activated
 	data[7] = 0x0D;
 	data[8] = 0x00;
 	data[9] = 0x39;
@@ -39,7 +40,7 @@ void datagrammeIP(uint8_t data [],int x, int y, int z, int t, int id)
 	data[18] = 0x4F;
 	data[19] = 0x1A;
 	data[20] = 0xAC;
-	
+	checksumIP(data);
 	data[23] = 0x06;
 	data[24] = 0x40;
 	data[25] = 0x00;
@@ -78,7 +79,7 @@ int main(void)
 	ad_init(0x00);
 	ad_init(0x01);
 	ad_init(0x02);
-	int gyro_X,gyro_Y,gyro_Z,temp,id;
+	uint8_t gyro_X,gyro_Y,gyro_Z,temp,id;
 	temp = 0;
 	id = 0;
 	uint8_t data[33];	
@@ -88,8 +89,8 @@ int main(void)
 		gyro_X = ad_sample(0x00);
 		gyro_Y = ad_sample(0x01);
 		gyro_Z = ad_sample(0x02);
+		id = 0x00 | (checkParity(gyro_X) << 3) | (checkParity(gyro_Y) << 2) | (checkParity(gyro_Z) << 1) | (checkParity(temp));
 		datagrammeIP(data, gyro_X, gyro_Y, gyro_Z, temp, id);
-		checksumIP(data);
 	}
 
 	return 0;
