@@ -40,13 +40,33 @@ int processPacket(unsigned char * message)
 		return -5;
 	}
 
-	printf(" \u21B3 X:%04d Y:%04d Z:%04d\n", message[1], message[2], message[3]);
-	printf(" \u21B3 Temp: %02d\u2103\n", message[4]);
+	if(((message[0] & 0x0F) == 0x0F) && (message[1] == 0xFF) && (message[2] == 0xFF) && (message[3] == 0xFF) && (message[4] == 0xFF))
+		printf(" \u21B3 Somebody died\n");
+	else
+	{
+		printf(" \u21B3 X:%04d Y:%04d Z:%04d\n", message[1], message[2], message[3]);
+		printf(" \u21B3 Temp: %02d\u2103\n", message[4]);
+		int cTeam = message[0] >> 4;
+		myTeams[cTeam].x = message[1];
+		myTeams[cTeam].y = message[2];
+		myTeams[cTeam].z = message[3];
+		myTeams[cTeam].t = message[4];
+	}
+
 	return 0;
 }
 
 int initUDPServer()
 {
+	int i;
+	for(i=0; i<MAX_TEAMS; i++)
+	{
+		myTeams[i].x = 0;
+		myTeams[i].y = 0;
+		myTeams[i].z = 0;
+		myTeams[i].t = 0;
+	}
+
 	char service[] = UDP_PORT;
 	struct addrinfo precisions,*resultat;
 	int statut;

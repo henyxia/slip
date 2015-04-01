@@ -3,6 +3,14 @@
 
 #define	MAX_TEAMS	11
 
+typedef struct
+{
+	unsigned char x;
+	unsigned char y;
+	unsigned char z;
+	unsigned char t;
+}team;
+
 const char teams[MAX_TEAMS][25] = {"Jean & Flavien",
 	"Cyril",
 	"Kevin",
@@ -14,5 +22,7 @@ const char teams[MAX_TEAMS][25] = {"Jean & Flavien",
 	"Sandra & Elise",
 	"Hideo",
 	"Arnaud"};
+
+team myTeams[MAX_TEAMS];
 
 #endif
