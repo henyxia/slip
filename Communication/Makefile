@@ -1,20 +1,11 @@
-#
-# Makefile pour generer la bibliotheque de fonctions de communication
-#
-
+#Communication lib
 all: libcom.a
 
-#
 # La cible de nettoyage
-#
-
 clean: 
 	rm -f core *.o libcom.a
 
-#
-# Les cibles pour la bibliotheque
-#
-
+#Lib target
 libcom.o: libcom.c libcom.h
  
 libcom.a: libcom.o

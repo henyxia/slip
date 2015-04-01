@@ -1,12 +1,5 @@
-#
-# Makefile pour generer la bibliotheque de threads
-#
-
+#Thread lib
 all:
 
-#
-# La cible de nettoyage
-#
-
+#Cleaning target
 clean: 
-

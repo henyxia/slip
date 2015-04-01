@@ -1,35 +1,19 @@
-#
-# Makefile du jeu des chaises musicales
-#
-
-#
-# Constantes pour la compilation des programmes
-#
-
+#Constants
 export CC = gcc
 export LD = gcc
 export CLIB = ar cq
 export CFLAGS = -g -Wall -DDEBUG
 
-#
-# Constantes liees au projet
-#
-
+#Working Dirs
 DIRS=Communication Threads Serveur
 
-#
-# La cible generale
-#
-
+#Main Target
 all: $(patsubst %, _dir_%, $(DIRS))
 
 $(patsubst %,_dir_%,$(DIRS)):
 	cd $(patsubst _dir_%,%,$@) && make
 
-#
-# La cible de nettoyage
-#
-
+#Cleaning target
 clean: $(patsubst %, _clean_%, $(DIRS))
 
 $(patsubst %,_clean_%,$(DIRS)):
