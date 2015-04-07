@@ -1,10 +1,7 @@
-/** fichier libcom.h **/
+#ifndef __LIB_COM__
+#define __LIB_COM__
 
-/******************************************************************/
-/** Ce fichier decrit les structures et les constantes utilisees **/
-/** par les fonctions de gestion des sockets                     **/
-/******************************************************************/
+int initialisationServer(char *service);
+int boucleServeur(int, void(*)(int));
 
-/**** Constantes ****/
-
-/**** Fonctions ****/
+#endif

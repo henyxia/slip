@@ -11,48 +11,60 @@
 
 #define MAC_SIZE	6
 #define IPV4_SIZE	4
+#define	END		0xC0
+#define	ESC		0xDB
+#define	ESC_END		0xDC
+#define	ESC_ESC		0xDD
 
 void datagrammeIP(uint8_t data [],int x, int y, int z, int t, int id)
 {
-	//Data
-	data[0] = t;
-	data[1] = z;
-	data[2] = y;
-	data[3] = x;
-	data[4] = id;
-	
-	//UDP
-	data[5] = 0x00;		//Checksum UDP
-	data[6] = 0x00;		//which is not activated
-	data[7] = 0x0D;
-	data[8] = 0x00;
-	data[9] = 0x39;
-	data[10] = 0x30;
-	data[11] = 0x10;
-	data[12] = 0xA4;
-
 	//IP
-	data[13] = 0x00;
-	data[14] = 0xF0;
-	data[15] = 0xFF;
-	data[16] = 0xFF;
-	data[17] = 0xC8;
-	data[18] = 0x4F;
-	data[19] = 0x1A;
-	data[20] = 0xAC;
-	checksumIP(data);
-	data[23] = 0x06;
-	data[24] = 0x40;
-	data[25] = 0x00;
-	data[26] = 0x00;
-	data[27] = 0x12;
-	data[28] = 0x00;
-	data[29] = 0x21;
-	data[30] = 0x00;
-	data[31] = 0x00;
-	data[32] = 0x45;
+	data[0] = 0x45; // v4, no opts
+	data[1] = 0x00; // DSCP / ECN
+	data[2] = 0x00; // Length
+	data[3] = 0x21; // Length
+	data[4] = 0x00; // Id
+	data[5] = 0x12; // Id
+	data[6] = 0x00; // Flags + Fragment Offset
+	data[7] = 0x00; // Fragment Offset
+	data[8] = 0x40; // TTL
+	data[9] = 0x11; // UDP
+	data[10] = 0x00; // IP Checksum
+	data[11] = 0x00; // IP Checksum
+
+	// Original Packet
+	//data[12] = 0xC0; // 192
+	data[12] = ESC;
+	data[13] = ESC_END;
 
 
+	data[14] = 0xA8; // 168
+	data[15] = 0x01; // 1
+	data[16] = 0x04; // 4
+	data[17] = 0xAC; // 172
+	data[18] = 0x1A; // 26
+	data[19] = 0x4F; // 79
+	data[20] = 0xFF; // 255
+
+	//UDP
+	data[21] = 0xA4; // Src port 42001
+	data[22] = 0x11; // Src port 42001
+	data[23] = 0x30; // Dest port 12345
+	data[24] = 0x39; // Dest port 12345
+	data[25] = 0x00; // Length 
+	data[26] = 0x0D; // Length
+	data[27] = 0x00; // Checksum UDP
+	data[28] = 0x00; // Checksum UDP
+
+	//Data
+	data[29] = 0x01; // ID
+	data[30] = 0x02; // X
+	data[31] = 0x03; // Y
+	data[32] = 0x04; // Z
+	data[33] = 0x05; // T
+
+	//SLIP
+	data[34] = END;
 }
 
 void checksumIP(uint8_t data[])
@@ -75,14 +87,13 @@ void checksumIP(uint8_t data[])
 int main(void)
 {
 	init_printf();
-	init_serial(9600);
 	ad_init(0x00);
 	ad_init(0x01);
 	ad_init(0x02);
 	uint8_t gyro_X,gyro_Y,gyro_Z,temp,id;
 	temp = 0;
 	id = 0;
-	uint8_t data[33];	
+	uint8_t data[33];
 
 	while (1)
 	{
@@ -91,6 +102,13 @@ int main(void)
 		gyro_Z = ad_sample(0x02);
 		id = 0x00 | (checkParity(gyro_X) << 3) | (checkParity(gyro_Y) << 2) | (checkParity(gyro_Z) << 1) | (checkParity(temp));
 		datagrammeIP(data, gyro_X, gyro_Y, gyro_Z, temp, id);
+		
+		//printf("Hello !\n");
+		//printf("%s\n", data);
+		int i;
+		for(i=0; i<34; i++)
+			send_serial(data[i]);
+		_delay_ms(1000);
 	}
 
 	return 0;

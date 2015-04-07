@@ -19,7 +19,7 @@ UCSR0B = (1<<TXEN0 | 1<<RXEN0);
 UCSR0C = (1<<UCSZ01 | 1<<UCSZ00);
 
 /* Set off UART baud doubler */
-UCSR0A &= ~(1 << U2X0);
+//UCSR0A &= ~(1 << U2X0);
 }
 
 void send_serial(char c){
