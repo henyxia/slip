@@ -73,30 +73,30 @@ void datagrammeIP(uint8_t data [],int x, int y, int z, int t, int id)
 	//data[13] = ESC_END;
 
 
-	data[14] = 0xA8; // 168
-	data[15] = 0x01; // 1
-	data[16] = 0x04; // 4
-	data[17] = 0xAC; // 172
-	data[18] = 0x1A; // 26
-	data[19] = 0x4F; // 79
-	data[20] = 0xFF; // 255
+	data[13] = 0xA8; // 168
+	data[14] = 0x01; // 1
+	data[15] = 0x04; // 4
+	data[16] = 0xAC; // 172
+	data[17] = 0x1A; // 26
+	data[18] = 0x4F; // 79
+	data[19] = 0xFF; // 255
 
 	//UDP
-	data[21] = 0xA4; // Src port 42001
-	data[22] = 0x11; // Src port 42001
-	data[23] = 0x30; // Dest port 12345
-	data[24] = 0x39; // Dest port 12345
-	data[25] = 0x00; // Length 
-	data[26] = 0x0D; // Length
+	data[20] = 0xA4; // Src port 42001
+	data[21] = 0x11; // Src port 42001
+	data[22] = 0x30; // Dest port 12345
+	data[23] = 0x39; // Dest port 12345
+	data[24] = 0x00; // Length 
+	data[25] = 0x0D; // Length
+	data[26] = 0x00; // Checksum UDP
 	data[27] = 0x00; // Checksum UDP
-	data[28] = 0x00; // Checksum UDP
 
 	//Data
-	data[29] = 0x01; // ID
-	data[30] = 0x02; // X
-	data[31] = 0x03; // Y
-	data[32] = 0x04; // Z
-	data[33] = 0x05; // T
+	data[28] = 0x01; // ID
+	data[29] = 0x02; // X
+	data[30] = 0x03; // Y
+	data[31] = 0x04; // Z
+	data[32] = 0x05; // T
 
 	//SLIP
 	//data[34] = END;
