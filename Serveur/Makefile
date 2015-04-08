@@ -11,11 +11,11 @@ all: serveur
 #Cleaning target
 
 clean: 
-	rm -f core *.o jeu
+	rm -f core *.o serveur
 
 #Output target
 
 serveur: $(OBJS)
 	$(CC) $(CFLAGS) -o serveur $(OBJS) $(LOCAL_LIBS) $(LIBS)
 
-serveur.o: serveur.c serveur.h
+serveur.o: serveur.c
