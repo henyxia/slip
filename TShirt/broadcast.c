@@ -45,10 +45,6 @@ void send_packet(uint8_t p)
           default:
           send_serial(p);
       }
-    
-    /* tell the receiver that we're done sending the packet
-     */
-    send_serial(END);
 }
 
 void datagrammeIP(uint8_t data [],int x, int y, int z, int t, int id)
@@ -105,18 +101,20 @@ void datagrammeIP(uint8_t data [],int x, int y, int z, int t, int id)
 void checksumIP(uint8_t data[])
 {
 	uint16_t checksum;
-	uint16_t array[9] = {((data[32]<<8) | data[31]),
-			 ((data[30]<<8) | data[29]),
-			 ((data[28]<<8) | data[27]),
-			 ((data[26]<<8) | data[25]),
-			 ((data[24]<<8) | data[23]),
-			 ((data[20]<<8) | data[19]),
-			 ((data[18]<<8) | data[17]),
-			 ((data[16]<<8) | data[15]),
-			 ((data[14]<<8) | data[13])};
+	uint16_t array[9] = {((data[0]<<8) | data[1]),
+			 ((data[2]<<8) | data[3]),
+			 ((data[4]<<8) | data[5]),
+			 ((data[6]<<8) | data[7]),
+			 ((data[8]<<8) | data[9]),
+			 ((data[12]<<8) | data[13]),
+			 ((data[14]<<8) | data[15]),
+			 ((data[16]<<8) | data[17]),
+			 ((data[18]<<8) | data[19])};
 	checksum = 0xFFFF - (array[0] + array[1] + array[2] + array[3] + array[4] + array[5] + array[6] + array[7] + array[8]);
+	printf("check = %d",checksum);
 
-	data[21] = checksum;
+	data[10] = (checksum >> 4) & 0x0F;
+	data[11] = checksum & 0x0F;
 }
 
 int main(void)
@@ -141,11 +139,16 @@ int main(void)
 		//printf("Hello !\n");
 		//printf("%s\n", data);
 		int i;
-		for(i=0; i<34; i++)
+		for(i=0; i<33; i++)
 		{
 			send_packet(data[i]);
-			_delay_ms(1000);
+			
 		}
+		/* tell the receiver that we're done sending the packet
+		 */
+		send_serial(END);
+
+		_delay_ms(1000); //wait 1s between the two packets
 	}
 	return 0;
 }
