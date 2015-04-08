@@ -16,6 +16,41 @@
 #define	ESC_END		0xDC
 #define	ESC_ESC		0xDD
 
+void send_packet(uint8_t p)
+{
+    /* for each byte in the packet, send the appropriate character
+     * sequence
+     */
+    
+   switch(p) {
+      /* if it's the same code as an END character, we send a
+       * special two character code so as not to make the
+       * receiver think we sent an END
+       */
+  		case END:
+          send_serial(ESC);
+          send_serial(ESC_END);
+          break;
+
+          /* if it's the same code as an ESC character,
+           * we send a special two character code so as not
+           * to make the receiver think we sent an ESC
+           */
+          case ESC:
+          send_serial(ESC);
+          send_serial(ESC_ESC);
+          break;
+          /* otherwise, we just send the character
+           */
+          default:
+          send_serial(p);
+      }
+    
+    /* tell the receiver that we're done sending the packet
+     */
+    send_serial(END);
+}
+
 void datagrammeIP(uint8_t data [],int x, int y, int z, int t, int id)
 {
 	//IP
@@ -33,9 +68,9 @@ void datagrammeIP(uint8_t data [],int x, int y, int z, int t, int id)
 	data[11] = 0x00; // IP Checksum
 
 	// Original Packet
-	//data[12] = 0xC0; // 192
-	data[12] = ESC;
-	data[13] = ESC_END;
+	data[12] = 0xC0; // 192
+	//data[12] = ESC;
+	//data[13] = ESC_END;
 
 
 	data[14] = 0xA8; // 168
@@ -64,7 +99,7 @@ void datagrammeIP(uint8_t data [],int x, int y, int z, int t, int id)
 	data[33] = 0x05; // T
 
 	//SLIP
-	data[34] = END;
+	//data[34] = END;
 }
 
 void checksumIP(uint8_t data[])
@@ -107,9 +142,10 @@ int main(void)
 		//printf("%s\n", data);
 		int i;
 		for(i=0; i<34; i++)
-			send_serial(data[i]);
-		_delay_ms(1000);
+		{
+			send_packet(data[i]);
+			_delay_ms(1000);
+		}
 	}
-
 	return 0;
 }
