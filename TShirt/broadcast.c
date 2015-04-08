@@ -62,13 +62,10 @@ void datagrammeIP(uint8_t data [],int x, int y, int z, int t, int id)
 	data[9] = 0x11; // UDP
 	data[10] = 0x00; // IP Checksum
 	data[11] = 0x00; // IP Checksum
+	checksumIP(data);
 
 	// Original Packet
 	data[12] = 0xC0; // 192
-	//data[12] = ESC;
-	//data[13] = ESC_END;
-
-
 	data[13] = 0xA8; // 168
 	data[14] = 0x01; // 1
 	data[15] = 0x04; // 4
@@ -93,9 +90,6 @@ void datagrammeIP(uint8_t data [],int x, int y, int z, int t, int id)
 	data[30] = 0x03; // Y
 	data[31] = 0x04; // Z
 	data[32] = 0x05; // T
-
-	//SLIP
-	//data[34] = END;
 }
 
 void checksumIP(uint8_t data[])
@@ -111,7 +105,10 @@ void checksumIP(uint8_t data[])
 			 ((data[16]<<8) | data[17]),
 			 ((data[18]<<8) | data[19])};
 	checksum = 0xFFFF - (array[0] + array[1] + array[2] + array[3] + array[4] + array[5] + array[6] + array[7] + array[8]);
-	printf("check = %d",checksum);
+	uint16_t test = checksum + array[0] + array[1] + array[2] + array[3] + array[4] + array[5] + array[6] + array[7] + array[8];
+
+	//send_serial(test);
+	//send_serial((test >> 8));
 
 	data[10] = (checksum >> 4) & 0x0F;
 	data[11] = checksum & 0x0F;
@@ -135,9 +132,7 @@ int main(void)
 		gyro_Z = ad_sample(0x02);
 		id = 0x00 | (checkParity(gyro_X) << 3) | (checkParity(gyro_Y) << 2) | (checkParity(gyro_Z) << 1) | (checkParity(temp));
 		datagrammeIP(data, gyro_X, gyro_Y, gyro_Z, temp, id);
-		
-		//printf("Hello !\n");
-		//printf("%s\n", data);
+
 		int i;
 		for(i=0; i<33; i++)
 		{
