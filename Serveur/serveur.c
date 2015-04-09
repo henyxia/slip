@@ -23,16 +23,20 @@ void hand(int sig)
 
 int main(int argc,char *argv[])
 {
+	// Yep, we want to run the soft
 	stop = false;
+
+	// SIGINT catch
 	action.sa_handler = hand;
 	sigaction(SIGINT, &action, NULL);
+
+	// Initialization UDP
 	//int ret;
-	newThread(heellllo, NULL, 0);
-/*
+	/*
 	int sUDP = initUDPServer();
 	if(sUDP != SOCKET_ERROR)
 	{
-		//ret = newThread(processUDPServer, &sUDP, sizeof(sUDP));
+		ret = newThread(processUDPServer, &sUDP, sizeof(sUDP));
 		if(ret != 0)
 			return 32 + ret;
 	}
@@ -49,10 +53,13 @@ int main(int argc,char *argv[])
 			return 3;
 		}
 	}
-*/
+	*/
+
+	// Infinite wait
 	while(!stop)
 		sleep(1);
 
+	// Wait for remaining thread before closing
 	waitForThreads();
 
 	printf("All thread stopped !\nGood Bye !\n");
