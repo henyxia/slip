@@ -112,10 +112,9 @@ void datagrammeIP(uint8_t data [],int x, int y, int z, int t, int id)
 	tempChecksum += (((uint32_t)data[32]) << 8);			//Data
 	
 	tempChecksum = (tempChecksum & 0x0000FFFF) + ((tempChecksum & 0xFFFF0000) >> 16);
-	/*if (tempChecksum > 0xFFFF)
-		tempChecksum = (tempChecksum & 0x0000FFFF) + ((tempChecksum & 0xFFFF0000) >> 16);*/
-	printf("checksum: %x",tempChecksum);
-	tempChecksum = ~tempChecksum;
+	if (tempChecksum > 0xFFFF)
+		tempChecksum = (tempChecksum & 0x0000FFFF) + ((tempChecksum & 0xFFFF0000) >> 16);
+	tempChecksum = 0x10000 - tempChecksum;
 	data[26] = (tempChecksum & 0x0000FF00) >> 8;	// Checksum UDP
 	data[27] = (tempChecksum & 0x000000FF);			// Checksum UDP
 
@@ -149,10 +148,10 @@ int main(void)
 		int i;
 		for(i=0; i<33; i++)
 		{
-			//send_packet(data[i]);
+			send_packet(data[i]);
 			
 		}
-		//send_serial(END);
+		send_serial(END);
 
 		_delay_ms(1000); //wait 1s between the two packets
 	}
