@@ -62,9 +62,6 @@ void datagrammeIP(uint8_t data [],int x, int y, int z, int t, int id)
 	data[9] = 0x11; // UDP
 	data[10] = 0x00; // IP Checksum
 	data[11] = 0x00; // IP Checksum
-	checksumIP(data);
-
-	// Original Packet
 	data[12] = 0xC0; // 192
 	data[13] = 0xA8; // 168
 	data[14] = 0x01; // 1
@@ -73,6 +70,22 @@ void datagrammeIP(uint8_t data [],int x, int y, int z, int t, int id)
 	data[17] = 0x1A; // 26
 	data[18] = 0x4F; // 79
 	data[19] = 0xFF; // 255
+	//Checksum
+	uint32_t tempChecksum = 0;
+	tempChecksum += (((uint32_t)data[0]) << 8) + data[1];
+	tempChecksum += (((uint32_t)data[2]) << 8) + data[3];
+	tempChecksum += (((uint32_t)data[4]) << 8) + data[5];
+	tempChecksum += (((uint32_t)data[6]) << 8) + data[7];
+	tempChecksum += (((uint32_t)data[8]) << 8) + data[9];
+	tempChecksum += (((uint32_t)data[12]) << 8) + data[13];
+	tempChecksum += (((uint32_t)data[14]) << 8) + data[15];
+	tempChecksum += (((uint32_t)data[16]) << 8) + data[17];
+	tempChecksum += (((uint32_t)data[18]) << 8) + data[19];
+	tempChecksum = (tempChecksum & 0x0000FFFF) + ((tempChecksum & 0xFFFF0000) >> 16);
+	tempChecksum = 0xFFFF - tempChecksum;
+	data[10] = (tempChecksum & 0x0000FF00) >> 8;
+	data[11] = (tempChecksum & 0x000000FF);
+
 
 	//UDP
 	data[20] = 0xA4; // Src port 42001
@@ -81,8 +94,22 @@ void datagrammeIP(uint8_t data [],int x, int y, int z, int t, int id)
 	data[23] = 0x39; // Dest port 12345
 	data[24] = 0x00; // Length 
 	data[25] = 0x0D; // Length
-	data[26] = 0x00; // Checksum UDP
-	data[27] = 0x00; // Checksum UDP
+	tempChecksum = 0;
+	tempChecksum += (((uint32_t)data[12]) << 8) + data[13]; // IP Src
+	tempChecksum += (((uint32_t)data[14]) << 8) + data[15]; // IP Src
+	tempChecksum += (((uint32_t)data[16]) << 8) + data[17]; // IP Dest
+	tempChecksum += (((uint32_t)data[18]) << 8) + data[19]; // IP Dest
+	tempChecksum += data[0]; // Protocol
+	tempChecksum += (((uint32_t)data[24]) << 8) + data[25]; // UDP Length
+	/*
+	tempChecksum += (((uint32_t)data[20]) << 8) + data[21]; // Source Port
+	tempChecksum += (((uint32_t)data[22]) << 8) + data[23];	// Dest Port
+	tempChecksum += (((uint32_t)data[22]) << 8) + data[];
+	*/
+	tempChecksum = (tempChecksum & 0x0000FFFF) + ((tempChecksum & 0xFFFF0000) >> 16);
+	tempChecksum = 0x10000 - tempChecksum;
+	data[26] = (tempChecksum & 0x0000FF00) >> 8;	// Checksum UDP
+	data[27] = (tempChecksum & 0x000000FF);			// Checksum UDP
 
 	//Data
 	data[28] = 0x01; // ID
@@ -90,28 +117,6 @@ void datagrammeIP(uint8_t data [],int x, int y, int z, int t, int id)
 	data[30] = 0x03; // Y
 	data[31] = 0x04; // Z
 	data[32] = 0x05; // T
-}
-
-void checksumIP(uint8_t data[])
-{
-	uint16_t checksum;
-	uint16_t array[9] = {((data[0]<<8) | data[1]),
-			 ((data[2]<<8) | data[3]),
-			 ((data[4]<<8) | data[5]),
-			 ((data[6]<<8) | data[7]),
-			 ((data[8]<<8) | data[9]),
-			 ((data[12]<<8) | data[13]),
-			 ((data[14]<<8) | data[15]),
-			 ((data[16]<<8) | data[17]),
-			 ((data[18]<<8) | data[19])};
-	checksum = 0xFFFF - (array[0] + array[1] + array[2] + array[3] + array[4] + array[5] + array[6] + array[7] + array[8]);
-	uint16_t test = checksum + array[0] + array[1] + array[2] + array[3] + array[4] + array[5] + array[6] + array[7] + array[8];
-
-	//send_serial(test);
-	//send_serial((test >> 8));
-
-	data[10] = (checksum >> 4) & 0x0F;
-	data[11] = checksum & 0x0F;
 }
 
 int main(void)
@@ -139,8 +144,6 @@ int main(void)
 			send_packet(data[i]);
 			
 		}
-		/* tell the receiver that we're done sending the packet
-		 */
 		send_serial(END);
 
 		_delay_ms(1000); //wait 1s between the two packets
