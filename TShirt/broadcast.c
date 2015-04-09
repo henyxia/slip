@@ -117,6 +117,8 @@ void datagrammeIP(uint8_t data [],int x, int y, int z, int t, int id)
 	tempChecksum = 0x10000 - tempChecksum;
 	data[26] = (tempChecksum & 0x0000FF00) >> 8;	// Checksum UDP
 	data[27] = (tempChecksum & 0x000000FF);			// Checksum UDP
+	data[26] = 0x00; // Checksum UDP
+	data[27] = 0x00; // Checksum UDP
 
 	//Data
 	data[28] = 0x01; // ID
