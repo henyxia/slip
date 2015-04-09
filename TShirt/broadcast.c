@@ -62,10 +62,10 @@ void datagrammeIP(uint8_t data [],int x, int y, int z, int t, int id)
 	data[9] = 0x11; // UDP
 	data[10] = 0x00; // IP Checksum
 	data[11] = 0x00; // IP Checksum
-	data[12] = 0xC0; // 192
-	data[13] = 0xA8; // 168
-	data[14] = 0x01; // 1
-	data[15] = 0x04; // 4
+	data[12] = 0xAC; // 172
+	data[13] = 0x1A; // 26
+	data[14] = 0x4F; // 79
+	data[15] = 0xC9; // 201
 	data[16] = 0xAC; // 172
 	data[17] = 0x1A; // 26
 	data[18] = 0x4F; // 79
