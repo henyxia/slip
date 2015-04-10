@@ -99,7 +99,7 @@ void datagrammeIP(uint8_t data [],int x, int y, int z, int t, int id)
 	data[25] = 0x0D; // Length
 
 	//Data
-	data[28] = 0x01; // ID
+	data[28] = id; // ID
 	data[29] = x; // X
 	data[30] = y; // Y
 	data[31] = z; // Z
