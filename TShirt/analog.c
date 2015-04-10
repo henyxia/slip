@@ -13,8 +13,7 @@ ADMUX=(ADMUX&0xf0)|channel;
 ADCSRA|=(1<<ADEN);
 }   
 
-unsigned int ad_sample(uint8_t pin){
-ADMUX = (0x01 << 6) | (pin & 0x07);
+unsigned int ad_sample(void){
 ADCSRA|=(1<<ADSC);
 while(bit_is_set(ADCSRA, ADSC));
 return ADCH;
