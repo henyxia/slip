@@ -97,6 +97,14 @@ void datagrammeIP(uint8_t data [],int x, int y, int z, int t, int id)
 	data[23] = 0x39; // Dest port 12345
 	data[24] = 0x00; // Length 
 	data[25] = 0x0D; // Length
+
+	//Data
+	data[28] = 0x01; // ID
+	data[29] = 0x02; // X
+	data[30] = 0x03; // Y
+	data[31] = 0x04; // Z
+	data[32] = 0x05; // T
+
 	tempChecksum = 0;
 	tempChecksum += (((uint32_t)data[12]) << 8) + data[13]; // IP Src
 	tempChecksum += (((uint32_t)data[14]) << 8) + data[15]; // IP Src
@@ -110,22 +118,15 @@ void datagrammeIP(uint8_t data [],int x, int y, int z, int t, int id)
 	tempChecksum += (((uint32_t)data[28]) << 8) + data[29]; //Data
 	tempChecksum += (((uint32_t)data[30]) << 8) + data[31]; //Data
 	tempChecksum += (((uint32_t)data[32]) << 8);			//Data
-	
+
 	tempChecksum = (tempChecksum & 0x0000FFFF) + ((tempChecksum & 0xFFFF0000) >> 16);
 	if (tempChecksum > 0xFFFF)
 		tempChecksum = (tempChecksum & 0x0000FFFF) + ((tempChecksum & 0xFFFF0000) >> 16);
-	tempChecksum = 0x10000 - tempChecksum;
+	tempChecksum = ~tempChecksum;
 	data[26] = (tempChecksum & 0x0000FF00) >> 8;	// Checksum UDP
 	data[27] = (tempChecksum & 0x000000FF);			// Checksum UDP
 	data[26] = 0x00; // Checksum UDP
 	data[27] = 0x00; // Checksum UDP
-
-	//Data
-	data[28] = 0x01; // ID
-	data[29] = 0x02; // X
-	data[30] = 0x03; // Y
-	data[31] = 0x04; // Z
-	data[32] = 0x05; // T
 }
 
 int main(void)
@@ -137,7 +138,7 @@ int main(void)
 	uint8_t gyro_X,gyro_Y,gyro_Z,temp,id;
 	temp = 0;
 	id = 0;
-	uint8_t data[33];
+	uint8_t data[32];
 
 	while (1)
 	{
