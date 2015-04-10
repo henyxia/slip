@@ -8,5 +8,6 @@ int		envoiMessage(int, unsigned char*, int);
 int		envoiMessageUnicast(int, int, unsigned char*, int);
 int		initialisationServeur(char*);
 void	boucleServeur(int, void (*)(int));
+void	shutdownServers(void);
 
 #endif

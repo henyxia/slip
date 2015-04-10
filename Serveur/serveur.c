@@ -6,29 +6,42 @@
 #include <signal.h>
 #include <libcom.h>
 #include "http.h"
-//#include "tcp.h"
-//#include "udp.h"
+//#include "teams.h"
+#include "udp.h"
 
 struct sigaction	action;
 bool				stop;
 
-void heellllo(void* arg)
-{
-	printf("Helllloooo ! \n");
-}
-
 void hand(int sig)
 {
 	printf("SIGINT caught stopping TCP and UDP servers\n");
+	shutdownServers();
 	stop = true;
 }
-
+/*
+void initTeams(void)
+{
+	int i;
+	for(i=0; i<MAX_TEAMS; i++)
+	{
+		myTeams[i].x = 0;
+		myTeams[i].y = 0;
+		myTeams[i].z = 0;
+		myTeams[i].t = 0;
+	}
+}
+*/
 void startTCPServer(void* arg)
 {
 
 	int *sTCP;
 	sTCP = arg;
 	boucleServeur(*sTCP, newHTTPClient);
+}
+
+void startUDPServer(void* arg)
+{
+	serveurMessages(12345, newUDPClient);
 }
 
 int main(int argc,char *argv[])
@@ -40,23 +53,17 @@ int main(int argc,char *argv[])
 	action.sa_handler = hand;
 	sigaction(SIGINT, &action, NULL);
 
-	// Initialization UDP
-	/*
-	int sUDP = initUDPServer();
-	if(sUDP != SOCKET_ERROR)
-	{
-		ret = newThread(processUDPServer, &sUDP, sizeof(sUDP));
-		if(ret != 0)
-			return 32 + ret;
-	}
+	// UDP
+	if(initUDPServer(12345) != SOCKET_ERROR)
+		newThread(startUDPServer, NULL, 0);
 	else
-		return 1;
-	*/
-
+		printf("UDP Init failed\n");
+/*
+	// TCP
 	int sTCP = initialisationServeur("80");
 	if(sTCP != SOCKET_ERROR)
 		newThread(startTCPServer, &sTCP, sizeof(sTCP));
-
+*/
 	// Infinite wait
 	while(!stop)
 		sleep(1);

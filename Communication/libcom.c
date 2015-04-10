@@ -15,64 +15,91 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 
+#include <stdbool.h>
+
 #include "libcom.h"
+#include "../Serveur/udp.h"
 
 #define MAX_TAMPON	1024
-#define	MSG_LENGTH	MAX_TAMPON
+//#define	MSG_LENGTH	MAX_TAMPON
 
-#ifdef DEBUG
-//static void afficheAdresse(FILE *flux,void *ip,int type);
-//static void afficheAdresseSocket(FILE *flux,struct sockaddr_storage *padresse);
-//static void afficheHote(FILE *flux,struct hostent *hote,int type);
-#endif
+bool stop = false;
+int udpSock = SOCKET_ERROR;
+
+// Common function
+void shutdownServers(void)
+{
+	stop = true;
+}
 
 // UDP Functions
-void serveurMessages(short int port, void (*func)(unsigned char *, int))
+int initUDPServer(short int port)
 {
+	//char service[] = UDP_PORT;
 	char service[8];
 	sprintf(service, "%d", port);
+	printf("Port used %s\n", service);
 	struct addrinfo precisions,*resultat;
 	int statut;
 	int s;
 
+	/* Construction de la structure adresse */
 	memset(&precisions,0,sizeof precisions);
 	precisions.ai_family=AF_UNSPEC;
 	precisions.ai_socktype=SOCK_DGRAM;
 	precisions.ai_flags=AI_PASSIVE;
 	statut=getaddrinfo(NULL,service,&precisions,&resultat);
+	if(statut<0){ perror("initialisationSocketUDP.getaddrinfo"); exit(EXIT_FAILURE); }
 
-	if(statut<0)
-	{
-		perror("initialisationSocketUDP.getaddrinfo");
-		exit(EXIT_FAILURE);
-	}
-
+	/* Creation d'une socket */
 	s=socket(resultat->ai_family,resultat->ai_socktype,resultat->ai_protocol);
-	if(s<0)
-	{
-		perror("initialisationSocketUDP.socket");
-		exit(EXIT_FAILURE);
-	}
+	if(s<0){ perror("initialisationSocketUDP.socket"); exit(EXIT_FAILURE); }
 
+	/* Options utiles */
 	int vrai=1;
-	if(setsockopt(s,SOL_SOCKET,SO_REUSEADDR,&vrai,sizeof(vrai))<0)
-	{
+	if(setsockopt(s,SOL_SOCKET,SO_REUSEADDR,&vrai,sizeof(vrai))<0){
 		perror("initialisationServeurUDPgenerique.setsockopt (REUSEADDR)");
 		exit(-1);
 	}
 
-	statut=bind(s,resultat->ai_addr,resultat->ai_addrlen);
-	if(statut<0)
+	// Other useful option
+	if(setsockopt(s, SOL_SOCKET, SO_BROADCAST, &vrai, sizeof vrai)<0)
 	{
-		perror("initialisationServeurUDP.bind");
+		perror("initialisationServeurUDPgenerique.setsockopt (BROADCAST)");
 		exit(-1);
 	}
 
+	/* Specification de l'adresse de la socket */
+	statut=bind(s,resultat->ai_addr,resultat->ai_addrlen);
+	if(statut<0) {perror("initialisationServeurUDP.bind"); exit(-1);}
+
+	/* Liberation de la structure d'informations */
 	freeaddrinfo(resultat);
 
-	//TODO
-	//Add the return into a global
-	//return s;
+	udpSock = s;
+
+	printf("Allowed socket : %d\n", udpSock);
+
+	return udpSock;
+
+}
+
+void serveurMessages(short int port, void (*func)(unsigned char *, int))
+{
+	printf("Freeze ?\n");
+	int sServ = udpSock;
+	printf("UDP Socket Internal %d\n", sServ);
+	while(!stop)
+	{
+		printf("Waiting for events\n");
+		struct sockaddr_storage adresse;
+		socklen_t taille=sizeof(adresse);
+		unsigned char message[MSG_LENGTH];
+		int nboctets=recvfrom(sServ,message,MSG_LENGTH,0,(struct sockaddr *)&adresse,&taille);
+		message[nboctets]='\0';
+		if(nboctets==MSG_LENGTH)
+			newUDPClient(message, 0);
+	}
 }
 
 int envoiMessage(int sock, unsigned char* str, int size)
@@ -93,7 +120,7 @@ int initialisationServeur(char* service)
 
 void boucleServeur(int sServ, void(*func)(int))
 {
-	while(1)
+	while(!stop)
 	{
 		printf("Waiting for events\n");
 		struct sockaddr_storage adresse;
