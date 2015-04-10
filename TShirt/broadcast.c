@@ -100,9 +100,9 @@ void datagrammeIP(uint8_t data [],int x, int y, int z, int t, int id)
 
 	//Data
 	data[28] = 0x01; // ID
-	data[29] = 0x02; // X
-	data[30] = 0x03; // Y
-	data[31] = 0x04; // Z
+	data[29] = x; // X
+	data[30] = y; // Y
+	data[31] = z; // Z
 	data[32] = 0x05; // T
 
 	tempChecksum = 0;
@@ -125,16 +125,11 @@ void datagrammeIP(uint8_t data [],int x, int y, int z, int t, int id)
 	tempChecksum = ~tempChecksum;
 	data[26] = (tempChecksum & 0x0000FF00) >> 8;	// Checksum UDP
 	data[27] = (tempChecksum & 0x000000FF);			// Checksum UDP
-	data[26] = 0x00; // Checksum UDP
-	data[27] = 0x00; // Checksum UDP
 }
 
 int main(void)
 {
 	init_printf();
-	ad_init(0x00);
-	ad_init(0x01);
-	ad_init(0x02);
 	uint8_t gyro_X,gyro_Y,gyro_Z,temp,id;
 	temp = 0;
 	id = 0;
@@ -142,11 +137,16 @@ int main(void)
 
 	while (1)
 	{
-		gyro_X = ad_sample(0x00);
-		gyro_Y = ad_sample(0x01);
-		gyro_Z = ad_sample(0x02);
+		ad_init(0x00);
+		gyro_X = ad_sample();
+		ad_init(0x01);
+		gyro_Y = ad_sample();
+		ad_init(0x02);
+		gyro_Z = ad_sample();
 		id = 0x00 | (checkParity(gyro_X) << 3) | (checkParity(gyro_Y) << 2) | (checkParity(gyro_Z) << 1) | (checkParity(temp));
 		datagrammeIP(data, gyro_X, gyro_Y, gyro_Z, temp, id);
+
+		//printf("x: %x, y: %x, z: %x\n",gyro_X,gyro_Y,gyro_Z);
 
 		int i;
 		for(i=0; i<33; i++)
