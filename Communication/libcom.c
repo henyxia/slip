@@ -26,8 +26,11 @@
 //static void afficheHote(FILE *flux,struct hostent *hote,int type);
 #endif
 
-int initialisationServer(char *service)
+// UDP Functions
+void serveurMessages(short int port, void (*func)(unsigned char *, int))
 {
+	char service[8];
+	sprintf(service, "%d", port);
 	struct addrinfo precisions,*resultat;
 	int statut;
 	int s;
@@ -67,10 +70,28 @@ int initialisationServer(char *service)
 
 	freeaddrinfo(resultat);
 
-	return s;
+	//TODO
+	//Add the return into a global
+	//return s;
 }
 
-int boucleServeur(int sServ, void(*func)(int))
+int envoiMessage(int sock, unsigned char* str, int size)
+{
+	return 0;
+}
+
+int envoiMessageUnicast(int target, int destIp, unsigned char* str, int size)
+{
+	return 0;
+}
+
+// TCP Functions
+int initialisationServeur(char* service)
+{
+	return 0;
+}
+
+void boucleServeur(int sServ, void(*func)(int))
 {
 	while(1)
 	{
@@ -83,9 +104,9 @@ int boucleServeur(int sServ, void(*func)(int))
 		if(nboctets==MSG_LENGTH);
 			//func(message);
 	}
-
-	return 0;
 }
+
+// Debug functions
 /*
 static void afficheAdresse(FILE *flux,void *ip,int type)
 {

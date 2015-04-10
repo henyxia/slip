@@ -4,8 +4,10 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <signal.h>
-#include "tcp.h"
-#include "udp.h"
+#include <libcom.h>
+#include "http.h"
+//#include "tcp.h"
+//#include "udp.h"
 
 struct sigaction	action;
 bool				stop;
@@ -21,6 +23,14 @@ void hand(int sig)
 	stop = true;
 }
 
+void startTCPServer(void* arg)
+{
+
+	int *sTCP;
+	sTCP = arg;
+	boucleServeur(*sTCP, newHTTPClient);
+}
+
 int main(int argc,char *argv[])
 {
 	// Yep, we want to run the soft
@@ -31,7 +41,6 @@ int main(int argc,char *argv[])
 	sigaction(SIGINT, &action, NULL);
 
 	// Initialization UDP
-	//int ret;
 	/*
 	int sUDP = initUDPServer();
 	if(sUDP != SOCKET_ERROR)
@@ -42,18 +51,11 @@ int main(int argc,char *argv[])
 	}
 	else
 		return 1;
-
-	int sTCP = initTCPServer();
-	if(sTCP != SOCKET_ERROR)
-	{
-		ret = pthread_create(&tTCP, NULL, processTCPServer, (void*) &sTCP);
-		if(ret != 0)
-		{
-			printf("TCP Thread failed starting\n");
-			return 3;
-		}
-	}
 	*/
+
+	int sTCP = initialisationServeur("80");
+	if(sTCP != SOCKET_ERROR)
+		newThread(startTCPServer, &sTCP, sizeof(sTCP));
 
 	// Infinite wait
 	while(!stop)

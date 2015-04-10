@@ -1,5 +1,5 @@
 #Server Makefile
-OBJS = serveur.o
+OBJS = serveur.o http.o
 LIBS = -lpthread
 LOCAL_LIBS  = -L ../Communication -L ../Threads
 LOCAL_LIBS += -lcom -lthrd
@@ -19,3 +19,4 @@ serveur: $(OBJS)
 	$(CC) $(CFLAGS) -o serveur $(OBJS) $(LOCAL_LIBS) $(LIBS)
 
 serveur.o: serveur.c
+http.o: http.c
