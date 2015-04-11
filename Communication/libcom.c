@@ -35,50 +35,40 @@ void shutdownServers(void)
 // UDP Functions
 int initUDPServer(short int port)
 {
-	//char service[] = UDP_PORT;
-	char service[8];
-	sprintf(service, "%d", port);
-	printf("Port used %s\n", service);
-	struct addrinfo precisions,*resultat;
-	int statut;
-	int s;
+	int s, status;
+	unsigned sinlen;
+	struct sockaddr_in sock_in;
 
-	/* Construction de la structure adresse */
-	memset(&precisions,0,sizeof precisions);
-	precisions.ai_family=AF_UNSPEC;
-	precisions.ai_socktype=SOCK_DGRAM;
-	precisions.ai_flags=AI_PASSIVE;
-	statut=getaddrinfo(NULL,service,&precisions,&resultat);
-	if(statut<0){ perror("initialisationSocketUDP.getaddrinfo"); exit(EXIT_FAILURE); }
+	sinlen = sizeof(struct sockaddr_in);
+	memset(&sock_in, 0, sinlen);
 
-	/* Creation d'une socket */
-	s=socket(resultat->ai_family,resultat->ai_socktype,resultat->ai_protocol);
-	if(s<0){ perror("initialisationSocketUDP.socket"); exit(EXIT_FAILURE); }
+	s = socket (PF_INET, SOCK_DGRAM, IPPROTO_UDP);
 
-	/* Options utiles */
-	int vrai=1;
-	if(setsockopt(s,SOL_SOCKET,SO_REUSEADDR,&vrai,sizeof(vrai))<0){
+	sock_in.sin_addr.s_addr = htonl(INADDR_ANY);
+	sock_in.sin_port = htons(12345);
+	sock_in.sin_family = PF_INET;
+
+	int yes = 1;
+	if(setsockopt(s,SOL_SOCKET,SO_REUSEADDR,&yes,sizeof(yes))<0){
 		perror("initialisationServeurUDPgenerique.setsockopt (REUSEADDR)");
 		exit(-1);
 	}
 
-	// Other useful option
-	if(setsockopt(s, SOL_SOCKET, SO_BROADCAST, &vrai, sizeof vrai)<0)
+	if(setsockopt(s, SOL_SOCKET, SO_BROADCAST, &yes, sizeof yes)<0)
 	{
 		perror("initialisationServeurUDPgenerique.setsockopt (BROADCAST)");
 		exit(-1);
 	}
 
-	/* Specification de l'adresse de la socket */
-	statut=bind(s,resultat->ai_addr,resultat->ai_addrlen);
-	if(statut<0) {perror("initialisationServeurUDP.bind"); exit(-1);}
+	status = bind(s, (struct sockaddr *)&sock_in, sinlen);
+	printf("Bind Status = %d\n", status);
 
-	/* Liberation de la structure d'informations */
-	freeaddrinfo(resultat);
+	status = getsockname(s, (struct sockaddr *)&sock_in, &sinlen);
+	printf("UDP Server listening on port %d\n",htons(sock_in.sin_port));
 
 	udpSock = s;
 
-	printf("Allowed socket : %d\n", udpSock);
+	printf("UDP Server socket is %d\n", udpSock);
 
 	return udpSock;
 
@@ -86,7 +76,7 @@ int initUDPServer(short int port)
 
 void serveurMessages(short int port, void (*func)(unsigned char *, int))
 {
-	printf("Freeze ?\n");
+	printf("UDP Server succesfully started and now listening\n");
 	int sServ = udpSock;
 	printf("UDP Socket Internal %d\n", sServ);
 	while(!stop)
