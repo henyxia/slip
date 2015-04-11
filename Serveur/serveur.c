@@ -43,18 +43,20 @@ int main(int argc,char *argv[])
 	// SIGINT catch
 	action.sa_handler = hand;
 	sigaction(SIGINT, &action, NULL);
-
+/*
 	// UDP
 	if(initUDPServer(12345) != SOCKET_ERROR)
 		newThread(startUDPServer, NULL, 0);
 	else
 		printf("UDP Init failed\n");
-/*
+*/
 	// TCP
-	int sTCP = initialisationServeur("80");
+	int sTCP = initialisationServeur("8080");
 	if(sTCP != SOCKET_ERROR)
 		newThread(startTCPServer, &sTCP, sizeof(sTCP));
-*/
+	else
+		printf("TCP Init failed\n");
+
 	// Infinite wait
 	while(!stop)
 		sleep(1);

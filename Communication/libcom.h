@@ -1,7 +1,8 @@
 #ifndef __LIB_COM__
 #define __LIB_COM__
 
-#define	SOCKET_ERROR	-1
+#define	SOCKET_ERROR		-1
+#define	MAX_HTTP_CLIENTS	100
 
 int		initUDPServer(short int);
 void	serveurMessages(void (*)(unsigned char *, int));
