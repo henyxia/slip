@@ -38,3 +38,16 @@ void setTeamValues(int team, unsigned char x, unsigned char y, unsigned char z, 
 	myTeams[team].z = z;
 	myTeams[team].t = t;
 }
+
+int getTeamValue(int team, unsigned char query)
+{
+	if(query == 'X')
+		return myTeams[team].x;
+	else if(query == 'Y')
+		return myTeams[team].y;
+	else if(query == 'Z')
+		return myTeams[team].z;
+	else if(query == 'T')
+		return myTeams[team].t;
+	return -1;
+}

@@ -5,7 +5,9 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <stdbool.h>
 #include "http.h"
+#include "teams.h"
 
 
 #include <errno.h>
@@ -17,6 +19,60 @@
 #define CODE_OK  200
 #define CODE_NOTFOUND 404
 
+bool acceptableVarChar(unsigned char buf)
+{
+	return ((buf>64 && buf <91) || (buf>47 && buf<58) || (buf == '_'));
+}
+
+void interpreter(FILE* webpage, FILE* client)
+{
+	unsigned char	buf = fgetc(webpage);
+	char			buffer[MAX_BUFFER];
+	int				cmdLen = 0;
+	int				team;
+	char			query;
+
+	while(cmdLen < MAX_BUFFER && !feof(webpage) && acceptableVarChar(buf))
+	{
+		buffer[cmdLen] = buf;
+		cmdLen++;
+		buf = fgetc(webpage);
+	}
+
+	if(cmdLen == 0)
+	{
+		fprintf(client, "<br/>This symbol is reserved<br/>\r\n");
+		return;
+	}
+	else if(cmdLen == MAX_BUFFER)
+	{
+		fprintf(client, "<br/>Your command is way too long<br/>\r\n");
+		return;
+	}
+	else
+	{
+		if(sscanf(buffer, "TEAMS_%d_%c", &team, &query) != 2)
+		{
+			fprintf(client, "<br/>Command recieved %s, %d char long, but not recognized<br/>", buffer, cmdLen);
+			return;
+		}
+		if(team<0 || team>=MAX_TEAMS)
+		{
+			fprintf(client, "<br/>The team %d does not exists\r\n<br/>", team);
+			return;
+		}
+		if(query == 'M')
+			fprintf(client, "%s", getTeamMembers(team));
+		else if(query == 'X' || query == 'Y' || query == 'Z' || query == 'T')
+			fprintf(client, "%d", getTeamValue(team, query));
+		else
+			fprintf(client, "<br/>Command not recognized\n");
+	}
+
+	// Writing last char
+	fputc(buf, client);
+}
+
 void newHTTPClient(int sock)
 {
 	printf("New HTTP Client (sock %d)\n", sock);
@@ -27,6 +83,7 @@ void newHTTPClient(int sock)
 	char	proto[MAX_BUFFER];
 	char	path[MAX_BUFFER];
 	char	type[MAX_BUFFER];
+	FILE*	webpage = NULL;
 	FILE*	client = NULL;
 
 	printf("Creating file descriptor\n");
@@ -79,12 +136,19 @@ void newHTTPClient(int sock)
 		fprintf(client,"\r\n");
 		fflush(client);
 		printf("Data send successfully\n");
-		int fd=open(path,O_RDONLY);
-		if(fd>=0)
+		webpage=fopen(path, "r");
+		if(webpage != NULL)
 		{
-			int bytes;
-			while((bytes=read(fd,buffer,MAX_BUFFER))>0)
-				write(sock,buffer,bytes);
+			unsigned char buf;
+			while(!feof(webpage))
+			{
+				buf = fgetc(webpage);
+				if(buf == '$')
+					interpreter(webpage, client);
+				else
+					if(!feof(webpage))
+						fputc(buf, client);
+			}
 		}
 	}
 	else

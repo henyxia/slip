@@ -13,6 +13,7 @@ typedef struct
 
 void	initTeams(void);
 char*	getTeamMembers(int);
+int		getTeamValue(int, unsigned char);
 void	setTeamValues(int, unsigned char, unsigned char, unsigned char, unsigned char);
 
 #endif
