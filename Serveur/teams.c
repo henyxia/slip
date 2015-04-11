@@ -1,0 +1,40 @@
+#include "teams.h"
+
+team myTeams[MAX_TEAMS];
+
+char teams[MAX_TEAMS][25] = {"Jean & Flavien",
+	"Cyril & JM",
+	"Kevin & Benjamin",
+	"Valentin & Alexander",
+	"Timothee & Mageshwaran",
+	"Jeremie & Julien",
+	"Mehdi & Thibault",
+	"Romain & Alexandre",
+	"Sandra & Elise",
+	"Hideo",
+	"Arnaud"};
+
+void initTeams(void)
+{
+	int i;
+	for(i=0; i<MAX_TEAMS; i++)
+	{
+		myTeams[i].x = 0;
+		myTeams[i].y = 0;
+		myTeams[i].z = 0;
+		myTeams[i].t = 0;
+	}
+}
+
+char* getTeamMembers(int team)
+{
+	return teams[team];
+}
+
+void setTeamValues(int team, unsigned char x, unsigned char y, unsigned char z, unsigned char t)
+{
+	myTeams[team].x = x;
+	myTeams[team].y = y;
+	myTeams[team].z = z;
+	myTeams[team].t = t;
+}

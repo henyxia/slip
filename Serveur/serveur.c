@@ -6,7 +6,7 @@
 #include <signal.h>
 #include <libcom.h>
 #include "http.h"
-//#include "teams.h"
+#include "teams.h"
 #include "udp.h"
 
 struct sigaction	action;
@@ -18,19 +18,7 @@ void hand(int sig)
 	shutdownServers();
 	stop = true;
 }
-/*
-void initTeams(void)
-{
-	int i;
-	for(i=0; i<MAX_TEAMS; i++)
-	{
-		myTeams[i].x = 0;
-		myTeams[i].y = 0;
-		myTeams[i].z = 0;
-		myTeams[i].t = 0;
-	}
-}
-*/
+
 void startTCPServer(void* arg)
 {
 
@@ -48,6 +36,9 @@ int main(int argc,char *argv[])
 {
 	// Yep, we want to run the soft
 	stop = false;
+
+	// Initializing teams
+	initTeams();
 
 	// SIGINT catch
 	action.sa_handler = hand;

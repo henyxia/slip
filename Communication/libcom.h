@@ -3,6 +3,7 @@
 
 #define	SOCKET_ERROR	-1
 
+int		initUDPServer(short int);
 void	serveurMessages(short int, void (*)(unsigned char *, int));
 int		envoiMessage(int, unsigned char*, int);
 int		envoiMessageUnicast(int, int, unsigned char*, int);

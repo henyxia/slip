@@ -20,7 +20,7 @@ void newUDPClient(unsigned char* message, int sock)
 		printf("\tWrong team number");
 		//return -1;
 	}
-	printf("Team %d (aka %s)\n", message[0] >> 4, teams[message[0] >> 4]);
+	printf("Team %d (aka %s)\n", message[0] >> 4, getTeamMembers(message[0] >> 4));
 	if(checkParity(message[1] + ((message[0] & 0x08) >> 3)))
 	{
 		printf(" \u21B3 X Parity error (X:%02x p:%02x t:%02x)\n", message[1], ((message[0] & 0x08) >> 3), (message[1] + ((message[0] & 0x08) >> 3)));
@@ -48,10 +48,6 @@ void newUDPClient(unsigned char* message, int sock)
 	{
 		printf(" \u21B3 X:%04d Y:%04d Z:%04d\n", message[1], message[2], message[3]);
 		printf(" \u21B3 Temp: %02d\u2103\n", message[4]);
-		int cTeam = message[0] >> 4;
-		myTeams[cTeam].x = message[1];
-		myTeams[cTeam].y = message[2];
-		myTeams[cTeam].z = message[3];
-		myTeams[cTeam].t = message[4];
+		setTeamValues(message[0] >> 4, message[1], message[2], message[3], message[4]);
 	}
 }

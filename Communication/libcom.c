@@ -45,7 +45,7 @@ int initUDPServer(short int port)
 	s = socket (PF_INET, SOCK_DGRAM, IPPROTO_UDP);
 
 	sock_in.sin_addr.s_addr = htonl(INADDR_ANY);
-	sock_in.sin_port = htons(12345);
+	sock_in.sin_port = htons(port);
 	sock_in.sin_family = PF_INET;
 
 	int yes = 1;

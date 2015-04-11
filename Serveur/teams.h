@@ -11,18 +11,8 @@ typedef struct
 	unsigned char t;
 }team;
 
-const char teams[MAX_TEAMS][25] = {"Jean & Flavien",
-	"Cyril",
-	"Kevin",
-	"Valentin & Alexander",
-	"Timothee & Mageshwaran",
-	"Jeremie & Julien",
-	"Mehdi",
-	"Romain & Alexandre",
-	"Sandra & Elise",
-	"Hideo",
-	"Arnaud"};
-
-team myTeams[MAX_TEAMS];
+void	initTeams(void);
+char*	getTeamMembers(int);
+void	setTeamValues(int, unsigned char, unsigned char, unsigned char, unsigned char);
 
 #endif
