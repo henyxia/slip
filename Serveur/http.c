@@ -52,6 +52,11 @@ void newHTTPClient(int sock)
 	if(strcasecmp(cmd,"GET")==0)
 	{
 		printf("The client want to GET the webpage %s\n", page);
+		if(strcmp(page, "/")==0)
+		{
+			printf("Let's help the client with the home page\n");
+			sprintf(page, "/index.html");
+		}
 		int code=CODE_OK;
 		struct stat fstat;
 		sprintf(path,"%s%s",WEB_DIR,page);
@@ -70,7 +75,7 @@ void newHTTPClient(int sock)
 		fprintf(client,"HTTP/1.0 %d\r\n",code);
 		fprintf(client,"Server: CWeb\r\n");
 		fprintf(client,"Content-type: %s\r\n",type);
-		fprintf(client,"Content-length: %d\r\n",fstat.st_size);
+		fprintf(client,"Content-length: %d\r\n", (int)fstat.st_size);
 		fprintf(client,"\r\n");
 		fflush(client);
 		printf("Data send successfully\n");
