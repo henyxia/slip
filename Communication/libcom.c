@@ -74,7 +74,7 @@ int initUDPServer(short int port)
 
 }
 
-void serveurMessages(short int port, void (*func)(unsigned char *, int))
+void serveurMessages(void (*func)(unsigned char *, int))
 {
 	printf("UDP Server succesfully started and now listening\n");
 	int sServ = udpSock;

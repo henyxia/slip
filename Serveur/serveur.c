@@ -29,7 +29,7 @@ void startTCPServer(void* arg)
 
 void startUDPServer(void* arg)
 {
-	serveurMessages(12345, newUDPClient);
+	serveurMessages(newUDPClient);
 }
 
 int main(int argc,char *argv[])
