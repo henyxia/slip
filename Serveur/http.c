@@ -84,4 +84,6 @@ void newHTTPClient(int sock)
 	}
 	else
 		printf("This command is not supported yet\n");
+
+	fclose(client);
 }
