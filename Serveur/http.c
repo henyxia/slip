@@ -78,8 +78,8 @@ void newHTTPClient(int sock)
 		if(fd>=0)
 		{
 			int bytes;
-			while((bytes=read(fd,buffer,MAX_BUFFER))>0) write(1,buffer,bytes);
-			close(fd);
+			while((bytes=read(fd,buffer,MAX_BUFFER))>0)
+				write(sock,buffer,bytes);
 		}
 	}
 	else
