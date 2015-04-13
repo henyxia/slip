@@ -95,12 +95,12 @@ void newHTTPClient(int sock)
 	if(fgets(buffer,MAX_BUFFER,client)==NULL)
 	{
 		printf("Client did not speak\n");
-		exit(-1);
+		return;
 	}
 	if(sscanf(buffer,"%s %s %s",cmd,page,proto)!=3)
 	{
 		printf("Unexpected format\n");
-		exit(-1);
+		return;
 	}
 	while(fgets(buffer,MAX_BUFFER,client)!=NULL)
 		if(strcmp(buffer,"\r\n")==0)
