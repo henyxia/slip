@@ -103,7 +103,7 @@ void datagrammeIP(uint8_t data [],int x, int y, int z, int t, int id)
 	data[29] = x; // X
 	data[30] = y; // Y
 	data[31] = z; // Z
-	data[32] = 0x05; // T
+	data[32] = t; // T
 
 	tempChecksum = 0;
 	tempChecksum += (((uint32_t)data[12]) << 8) + data[13]; // IP Src
@@ -143,6 +143,8 @@ int main(void)
 		gyro_Y = ad_sample();
 		ad_init(0x02);
 		gyro_Z = ad_sample();
+		ad_init(0x04);
+		temp = ad_sample();
 		id = 0x00 | (checkParity(gyro_X) << 3) | (checkParity(gyro_Y) << 2) | (checkParity(gyro_Z) << 1) | (checkParity(temp));
 		datagrammeIP(data, gyro_X, gyro_Y, gyro_Z, temp, id);
 
