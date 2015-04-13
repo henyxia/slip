@@ -47,7 +47,7 @@ void send_packet(uint8_t p)
       }
 }
 
-void datagrammeIP(uint8_t data [],int x, int y, int z, int t, int id)
+void datagrammeIP(uint8_t data [],int x, int y, int z, int t)
 {
 	//IP
 	data[0] = 0x45; // v4, no opts
@@ -98,12 +98,12 @@ void datagrammeIP(uint8_t data [],int x, int y, int z, int t, int id)
 	data[24] = 0x00; // Length 
 	data[25] = 0x0D; // Length
 
-	//Data
-	data[28] = id; // ID
+	//Data	
 	data[29] = x; // X
 	data[30] = y; // Y
 	data[31] = z; // Z
 	data[32] = t; // T
+	data[28] = 0x00 | (checkParity(x) << 3) | (checkParity(y) << 2) | (checkParity(z) << 1) | (checkParity(t));
 
 	tempChecksum = 0;
 	tempChecksum += (((uint32_t)data[12]) << 8) + data[13]; // IP Src
@@ -130,9 +130,9 @@ void datagrammeIP(uint8_t data [],int x, int y, int z, int t, int id)
 int main(void)
 {
 	init_printf();
-	uint8_t gyro_X,gyro_Y,gyro_Z,temp,id;
+	uint8_t gyro_X,gyro_Y,gyro_Z,temp;
+	float Vout;
 	temp = 0;
-	id = 0;
 	uint8_t data[32];
 
 	while (1)
@@ -145,8 +145,9 @@ int main(void)
 		gyro_Z = ad_sample();
 		ad_init(0x04);
 		temp = ad_sample();
-		id = 0x00 | (checkParity(gyro_X) << 3) | (checkParity(gyro_Y) << 2) | (checkParity(gyro_Z) << 1) | (checkParity(temp));
-		datagrammeIP(data, gyro_X, gyro_Y, gyro_Z, temp, id);
+		Vout = temp*0.00488;
+		temp = (int)((Vout-0.5)*100);
+		datagrammeIP(data, gyro_X, gyro_Y, gyro_Z, temp);
 
 		//printf("x: %x, y: %x, z: %x\n",gyro_X,gyro_Y,gyro_Z);
 
