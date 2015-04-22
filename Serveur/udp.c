@@ -5,15 +5,34 @@
 #include <unistd.h>
 #include <netdb.h>
 #include <string.h>
-
+#include <libthrd.h>
 #include "udp.h"
 #include "teams.h"
 #include "parity.h"
 
 typedef int SOCKET;
 
-void newUDPClient(unsigned char* message, int sock)
+typedef struct
 {
+	unsigned char message[5];
+	int sock;
+}UDPMessage, *pUDPMessage;
+
+void processUDPClient(void *arg)
+{
+	pUDPMessage myMessage = arg;
+	unsigned char	message[6];
+	//int sock = myMessage->sock;
+	printf("Message RCV %02X%02X%02X%02X%02X\n", myMessage->message[4], myMessage->message[3], myMessage->message[2], myMessage->message[1], myMessage->message[0]);
+
+	//strncpy((char*)message, (char*)myMessage->message, 6);
+
+	message[4] = myMessage->message[4];
+	message[3] = myMessage->message[3];
+	message[2] = myMessage->message[2];
+	message[1] = myMessage->message[1];
+	message[0] = myMessage->message[0];
+
 	int team = message[0] >> 4;
 	if(team < 0 || team >= MAX_TEAMS)
 	{
@@ -51,3 +70,26 @@ void newUDPClient(unsigned char* message, int sock)
 		setTeamValues(message[0] >> 4, message[1], message[2], message[3], message[4]);
 	}
 }
+
+void newUDPClient(unsigned char* message, int sock)
+{
+	pUDPMessage myMessage = NULL;
+
+	myMessage = (pUDPMessage) malloc(sizeof(UDPMessage));
+	myMessage->message[4] = message[4];
+	myMessage->message[3] = message[3];
+	myMessage->message[2] = message[2];
+	myMessage->message[1] = message[1];
+	myMessage->message[0] = message[0];
+	//strncpy((char*)myMessage->message, (char*)message, 6);
+	myMessage->sock = sock;
+
+	if(myMessage == NULL)
+	{
+		printf("Unable to allocate a new UDP client\n");
+		return;
+	}
+
+	newThread(processUDPClient, myMessage, sizeof(UDPMessage));
+}
+

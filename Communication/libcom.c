@@ -86,7 +86,9 @@ void serveurMessages(void (*func)(unsigned char *, int))
 		socklen_t taille=sizeof(adresse);
 		unsigned char message[MSG_LENGTH];
 		int nboctets=recvfrom(sServ,message,MSG_LENGTH,0,(struct sockaddr *)&adresse,&taille);
+		printf("New message recieved (%d length)\n", nboctets);
 		message[nboctets]='\0';
+		printf("Message SND %02X%02X%02X%02X%02X\n", message[4], message[3], message[2], message[1], message[0]);
 		if(nboctets==MSG_LENGTH)
 			newUDPClient(message, 0);
 	}
