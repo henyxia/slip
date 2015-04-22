@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdbool.h>
+#include <libthrd.h>
 #include "http.h"
 #include "teams.h"
 
@@ -73,8 +74,10 @@ void interpreter(FILE* webpage, FILE* client)
 	fputc(buf, client);
 }
 
-void newHTTPClient(int sock)
+void processHTTPClient(void* arg)
 {
+	int *tmp = arg;
+	int sock = *tmp;
 	printf("New HTTP Client (sock %d)\n", sock);
 
 	char	buffer[MAX_BUFFER];
@@ -156,3 +159,9 @@ void newHTTPClient(int sock)
 
 	fclose(client);
 }
+
+void newHTTPClient(int sock)
+{
+	newThread(processHTTPClient, &sock, sizeof(int * ));
+}
+
