@@ -10,6 +10,8 @@
 #include "teams.h"
 #include "parity.h"
 
+#define MAX_TEAM_FILE	32
+
 typedef int SOCKET;
 
 typedef struct
@@ -68,6 +70,19 @@ void processUDPClient(void *arg)
 		printf(" \u21B3 X:%04d Y:%04d Z:%04d\n", message[1], message[2], message[3]);
 		printf(" \u21B3 Temp: %02d\u2103\n", message[4]);
 		setTeamValues(message[0] >> 4, message[1], message[2], message[3], message[4]);
+		P(message[0] >> 4);
+		FILE* teamFile = NULL;
+		char teamFileName[MAX_TEAM_FILE];
+		sprintf(teamFileName, "team%d.bin", message[0] >> 4);
+		teamFile = fopen(teamFileName, "ab");
+		if(teamFile == NULL)
+		{
+			printf("Unable to open the team %d log\n", message[0] >> 4);
+			return;
+		}
+		fwrite(getTeamValues(message[0] >> 4), sizeof(team), 1, teamFile);
+		fclose(teamFile);
+		V(message[0] >> 4);
 	}
 }
 

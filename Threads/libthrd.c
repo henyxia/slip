@@ -57,3 +57,11 @@ void waitForThreads()
 		sleep(1);
 	}
 }
+
+void P(int team)
+{
+}
+
+void V(int team)
+{
+}

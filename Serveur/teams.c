@@ -51,3 +51,8 @@ int getTeamValue(int team, unsigned char query)
 		return myTeams[team].t;
 	return -1;
 }
+
+team* getTeamValues(int team)
+{
+	return &(myTeams[team]);
+}

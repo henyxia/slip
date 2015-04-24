@@ -3,5 +3,7 @@
 
 int		newThread(void(*) (void*), void*, int);
 void	waitForThreads();
+void	P(int);
+void	V(int);
 
 #endif
