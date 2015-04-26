@@ -1,5 +1,6 @@
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -22,6 +23,7 @@ typedef struct
 
 void processUDPClient(void *arg)
 {
+	struct timeval tv;
 	pUDPMessage myMessage = arg;
 	unsigned char	message[6];
 	//int sock = myMessage->sock;
@@ -69,7 +71,8 @@ void processUDPClient(void *arg)
 	{
 		printf(" \u21B3 X:%04d Y:%04d Z:%04d\n", message[1], message[2], message[3]);
 		printf(" \u21B3 Temp: %02d\u2103\n", message[4]);
-		setTeamValues(message[0] >> 4, message[1], message[2], message[3], message[4]);
+		gettimeofday(&tv, NULL);
+		setTeamValues(message[0] >> 4, message[1], message[2], message[3], message[4], tv.tv_sec);
 		P(message[0] >> 4);
 		FILE* teamFile = NULL;
 		char teamFileName[MAX_TEAM_FILE];

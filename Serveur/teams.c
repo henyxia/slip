@@ -31,12 +31,13 @@ char* getTeamMembers(int team)
 	return teams[team];
 }
 
-void setTeamValues(int team, unsigned char x, unsigned char y, unsigned char z, unsigned char t)
+void setTeamValues(int team, unsigned char x, unsigned char y, unsigned char z, unsigned char t, long int lastUpdate)
 {
 	myTeams[team].x = x;
 	myTeams[team].y = y;
 	myTeams[team].z = z;
 	myTeams[team].t = t;
+	myTeams[team].lastUpdate = lastUpdate;
 }
 
 int getTeamValue(int team, unsigned char query)
