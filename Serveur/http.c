@@ -189,7 +189,7 @@ void processHTTPClient(void* arg)
 				fprintf(client, "{");
 				fprintf(client, "\"%ld\":{\"x\":%d,\"y\":%d,\"z\":%d,\"t\":%d}", thisTeam.lastUpdate, thisTeam.x, thisTeam.y, thisTeam.z, thisTeam.t);
 				while(!feof(webpage))
-					if(fread(&thisTeam, sizeof(team), 1, webpage) != 1)
+					if(fread(&thisTeam, sizeof(team), 1, webpage) == 1)
 						fprintf(client, ",\"%ld\":{\"x\":%d,\"y\":%d,\"z\":%d,\"t\":%d}", thisTeam.lastUpdate, thisTeam.x, thisTeam.y, thisTeam.z, thisTeam.t);
 				fprintf(client, "}");
 				fprintf(client,"\r\n");
