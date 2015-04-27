@@ -136,18 +136,19 @@ void processHTTPClient(void* arg)
 		else if(strcmp(end-5,".json")==0)
 		{
 			//Last chance catching
-			int		team;
+			int		teamNumber;
 			char	filename[64];
+			team	thisTeam;
 			printf("Catching a JSON request\n");
-			if(sscanf(page, "/team%d.json", &team) == 1)
+			if(sscanf(page, "/team%d.json", &teamNumber) == 1)
 			{
 				code=CODE_OK;
-				printf("Generating JSON for team %d\n", team);
+				printf("Generating JSON for team %d\n", teamNumber);
 				strcpy(type, "application/json");
-				printf("Getting lock for team file %d\n", team);
-				P(team);
-				printf("Lock get for team file %d\n", team);
-				sprintf(filename, "team%d.bin", team);
+				printf("Getting lock for team file %d\n", teamNumber);
+				P(teamNumber);
+				printf("Lock get for team file %d\n", teamNumber);
+				sprintf(filename, "team%d.bin", teamNumber);
 				webpage = fopen(filename, "rb");
 				if(webpage == NULL)
 				{
@@ -163,10 +164,45 @@ void processHTTPClient(void* arg)
 					fprintf(client,"\r\n");
 					fflush(client);
 					fclose(client);
-					V(team);
+					V(teamNumber);
 					return;
 				}
 				printf("JSON opened\n");
+				fprintf(client,"HTTP/1.0 %d\r\n",code);
+				fprintf(client,"Server: PDCWeb\r\n");
+				fprintf(client,"Content-type: %s\r\n",type);
+				fprintf(client,"Content-length: 2048\r\n");
+				fprintf(client,"\r\n");
+				fflush(client);
+				printf("Header sent\n");
+				if(fread(&thisTeam, sizeof(team), 1, webpage) != 1)
+				{
+					printf("Unable to read team's data\n");
+					fprintf(client, "{}");
+					fprintf(client,"\r\n");
+					fflush(client);
+					fclose(client);
+					fclose(webpage);
+					V(teamNumber);
+					return;
+				}
+				fprintf(client, "{");
+				fprintf(client, "\"%ld\":{\"x\":%d,\"y\":%d,\"z\":%d,\"t\":%d}", thisTeam.lastUpdate, thisTeam.x, thisTeam.y, thisTeam.z, thisTeam.t);
+				while(!feof(webpage))
+					if(fread(&thisTeam, sizeof(team), 1, webpage) != 1)
+						fprintf(client, ",\"%ld\":{\"x\":%d,\"y\":%d,\"z\":%d,\"t\":%d}", thisTeam.lastUpdate, thisTeam.x, thisTeam.y, thisTeam.z, thisTeam.t);
+				fprintf(client, "}");
+				fprintf(client,"\r\n");
+				fflush(client);
+				fclose(client);
+				fclose(webpage);
+				V(teamNumber);
+				return;
+
+
+
+
+
 			}
 			else
 				printf("This JSON will not be generated\n");
