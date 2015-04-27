@@ -7,18 +7,16 @@
 #include <sys/stat.h>
 #include <stdbool.h>
 #include <libthrd.h>
+#include <errno.h>
 #include "http.h"
 #include "teams.h"
 
+#define WEB_DIR			"./www"
+#define PAGE_NOTFOUND	"error.html"
+#define MAX_BUFFER		1024
 
-#include <errno.h>
-
-#define WEB_DIR  "./www"
-#define PAGE_NOTFOUND "error.html"
-#define MAX_BUFFER 1024
-
-#define CODE_OK  200
-#define CODE_NOTFOUND 404
+#define CODE_OK			200
+#define CODE_NOTFOUND	404
 
 bool acceptableVarChar(unsigned char buf)
 {
@@ -129,11 +127,52 @@ void processHTTPClient(void* arg)
 	    }
 		strcpy(type,"text/html");
 		char *end=page+strlen(page);
-		if(strcmp(end-4,".png")==0) strcpy(type,"image/png");
-		if(strcmp(end-4,".jpg")==0) strcpy(type,"image/jpg");
-		if(strcmp(end-4,".gif")==0) strcpy(type,"image/gif");
+		if(strcmp(end-4,".png")==0)
+			strcpy(type,"image/png");
+		else if(strcmp(end-4,".jpg")==0)
+			strcpy(type,"image/jpg");
+		else if(strcmp(end-4,".gif")==0)
+			strcpy(type,"image/gif");
+		else if(strcmp(end-5,".json")==0)
+		{
+			//Last chance catching
+			int		team;
+			char	filename[64];
+			printf("Catching a JSON request\n");
+			if(sscanf(page, "/team%d.json", &team) == 1)
+			{
+				code=CODE_OK;
+				printf("Generating JSON for team %d\n", team);
+				strcpy(type, "application/json");
+				printf("Getting lock for team file %d\n", team);
+				P(team);
+				printf("Lock get for team file %d\n", team);
+				sprintf(filename, "team%d.bin", team);
+				webpage = fopen(filename, "rb");
+				if(webpage == NULL)
+				{
+					fprintf(client,"HTTP/1.0 %d\r\n",code);
+					fprintf(client,"Server: PDCWeb\r\n");
+					fprintf(client,"Content-type: %s\r\n",type);
+					fprintf(client,"Content-length: 4\r\n");
+					fprintf(client,"\r\n");
+					fflush(client);
+					printf("Header sent\n");
+					printf("This JSON might be empty, sending empty JSON\n");
+					fprintf(client, "{}");
+					fprintf(client,"\r\n");
+					fflush(client);
+					fclose(client);
+					V(team);
+					return;
+				}
+				printf("JSON opened\n");
+			}
+			else
+				printf("This JSON will not be generated\n");
+		}
 		fprintf(client,"HTTP/1.0 %d\r\n",code);
-		fprintf(client,"Server: CWeb\r\n");
+		fprintf(client,"Server: PDCWeb\r\n");
 		fprintf(client,"Content-type: %s\r\n",type);
 		fprintf(client,"Content-length: %d\r\n", (int)fstat.st_size);
 		fprintf(client,"\r\n");

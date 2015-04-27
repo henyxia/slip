@@ -37,8 +37,9 @@ int main(int argc,char *argv[])
 	// Yep, we want to run the soft
 	stop = false;
 
-	// Initializing teams
+	// Initializing teams & threads
 	initTeams();
+	initThreads(MAX_TEAMS);
 
 	// SIGINT catch
 	action.sa_handler = hand;

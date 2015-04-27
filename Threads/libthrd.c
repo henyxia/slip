@@ -114,6 +114,13 @@ void init_sem(int N)
 	}
 }
 
+void initThreads(int sem)
+{
+	create_sem(sem);
+	init_sem(sem);
+}
+
+
 void PV(int i, int act)
 {
 	struct sembuf op;
