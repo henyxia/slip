@@ -171,7 +171,7 @@ void processHTTPClient(void* arg)
 				fprintf(client,"HTTP/1.0 %d\r\n",code);
 				fprintf(client,"Server: PDCWeb\r\n");
 				fprintf(client,"Content-type: %s\r\n",type);
-				fprintf(client,"Content-length: 2048\r\n");
+				fprintf(client,"Content-length: 20480\r\n");
 				fprintf(client,"\r\n");
 				fflush(client);
 				printf("Header sent\n");
@@ -187,10 +187,10 @@ void processHTTPClient(void* arg)
 					return;
 				}
 				fprintf(client, "{");
-				fprintf(client, "\"%ld\":{\"x\":%d,\"y\":%d,\"z\":%d,\"t\":%d}", thisTeam.lastUpdate, thisTeam.x, thisTeam.y, thisTeam.z, thisTeam.t);
-				while(!feof(webpage))
+				fprintf(client, "\"%u\":{\"x\":%d,\"y\":%d,\"z\":%d,\"t\":%d}", thisTeam.lastUpdate, thisTeam.x, thisTeam.y, thisTeam.z, thisTeam.t);
+				while(!feof(webpage)&&!ferror(webpage))
 					if(fread(&thisTeam, sizeof(team), 1, webpage) == 1)
-						fprintf(client, ",\"%ld\":{\"x\":%d,\"y\":%d,\"z\":%d,\"t\":%d}", thisTeam.lastUpdate, thisTeam.x, thisTeam.y, thisTeam.z, thisTeam.t);
+						fprintf(client, ",\n\"%u\":{\"x\":%d,\"y\":%d,\"z\":%d,\"t\":%d}", thisTeam.lastUpdate, thisTeam.x, thisTeam.y, thisTeam.z, thisTeam.t);
 				fprintf(client, "}");
 				fprintf(client,"\r\n");
 				fflush(client);

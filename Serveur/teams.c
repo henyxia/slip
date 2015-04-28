@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "teams.h"
 
 team myTeams[MAX_TEAMS];
@@ -23,6 +24,7 @@ void initTeams(void)
 		myTeams[i].y = 0;
 		myTeams[i].z = 0;
 		myTeams[i].t = 0;
+		myTeams[i].lastUpdate = 0;
 	}
 }
 
@@ -31,8 +33,9 @@ char* getTeamMembers(int team)
 	return teams[team];
 }
 
-void setTeamValues(int team, unsigned char x, unsigned char y, unsigned char z, unsigned char t, long int lastUpdate)
+void setTeamValues(int team, unsigned char x, unsigned char y, unsigned char z, unsigned char t, unsigned int lastUpdate)
 {
+	printf("New values set to X %d Y %d Z %d T %d LU %u\n", x, y, z, t, lastUpdate);
 	myTeams[team].x = x;
 	myTeams[team].y = y;
 	myTeams[team].z = z;

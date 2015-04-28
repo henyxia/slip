@@ -27,7 +27,9 @@ void processUDPClient(void *arg)
 	pUDPMessage myMessage = arg;
 	unsigned char	message[6];
 	//int sock = myMessage->sock;
+#ifdef DEBUG
 	printf("Message RCV %02X%02X%02X%02X%02X\n", myMessage->message[4], myMessage->message[3], myMessage->message[2], myMessage->message[1], myMessage->message[0]);
+#endif
 
 	//strncpy((char*)message, (char*)myMessage->message, 6);
 
@@ -72,7 +74,8 @@ void processUDPClient(void *arg)
 		printf(" \u21B3 X:%04d Y:%04d Z:%04d\n", message[1], message[2], message[3]);
 		printf(" \u21B3 Temp: %02d\u2103\n", message[4]);
 		gettimeofday(&tv, NULL);
-		setTeamValues(message[0] >> 4, message[1], message[2], message[3], message[4], tv.tv_sec);
+		printf(" \u21B3 Last update since epoch: %u\n", (unsigned int) tv.tv_sec);
+		setTeamValues(message[0] >> 4, message[1], message[2], message[3], message[4], (unsigned int) tv.tv_sec);
 		P(message[0] >> 4);
 		FILE* teamFile = NULL;
 		char teamFileName[MAX_TEAM_FILE];

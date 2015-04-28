@@ -5,17 +5,17 @@
 
 typedef struct
 {
+	unsigned int	lastUpdate;
 	unsigned char	x;
 	unsigned char	y;
 	unsigned char	z;
 	unsigned char	t;
-	long int		lastUpdate;
 }team;
 
 void	initTeams(void);
 char*	getTeamMembers(int);
 int		getTeamValue(int, unsigned char);
-void	setTeamValues(int, unsigned char, unsigned char, unsigned char, unsigned char, long int);
+void	setTeamValues(int, unsigned char, unsigned char, unsigned char, unsigned char, unsigned int);
 team*	getTeamValues(int);
 
 #endif
