@@ -47,6 +47,58 @@ void send_packet(uint8_t p)
       }
 }
 
+int receive_packet()
+{
+   /* RECV_PACKET: receives a packet into the buffer located at "p".
+    *      If more than len bytes are received, the packet will
+    *      be truncated.
+    *      Returns the number of bytes stored in the buffer.
+    */
+
+   uint8_t c;
+
+   /* sit in a loop reading bytes until we put together
+    * a whole packet.
+    * Make sure not to copy them into the packet if we
+    * run out of room.
+    */
+   while(1) {
+           // get a character to process
+           c = get_serial();
+
+           // handle bytestuffing if necessary
+           switch(c) {
+
+           /* if it's an END character then we're done with
+            * the packet
+            */
+           case END:
+                   return -1;
+
+           /* if it's the same code as an ESC character, wait
+            * and get another character and then figure out
+            * what to store in the packet based on that.
+            */
+           case ESC:
+                   c = get_serial();
+
+                   /* if "c" is not one of these two, then we
+                    * have a protocol violation.  The best bet
+                    * seems to be to leave the byte alone and
+                    * just stuff it into the packet
+                    */
+                   switch(c) {
+                   case ESC_END:
+                           c = END;
+                           return c;
+                   case ESC_ESC:
+                           c = ESC;
+                           return c;
+                   }
+           }
+    }
+}
+
 void datagrammeIP(uint8_t data [],int x, int y, int z, int t)
 {
 	//IP
@@ -127,38 +179,59 @@ void datagrammeIP(uint8_t data [],int x, int y, int z, int t)
 	data[27] = (tempChecksum & 0x000000FF);			// Checksum UDP
 }
 
+void send_data(uint8_t data [])
+{
+	uint8_t gyro_X,gyro_Y,gyro_Z,temp,c;
+	float Vout;
+	temp = 0;
+
+	gyro_X = ad_sample();
+	ad_init(0x01);
+	gyro_Y = ad_sample();
+	ad_init(0x02);
+	gyro_Z = ad_sample();
+	ad_init(0x04);
+	temp = ad_sample();
+	Vout = temp*0.01953;
+	temp = (int)((Vout-0.5)*100);
+	datagrammeIP(data, gyro_X, gyro_Y, gyro_Z, temp);
+
+	int i,j=0;
+	for(i=0; i<33; i++)
+	{
+		send_packet(data[i]);		
+	}
+	send_serial(END);
+}
+
 int main(void)
 {
 	init_printf();
-	uint8_t gyro_X,gyro_Y,gyro_Z,temp;
-	float Vout;
-	temp = 0;
 	uint8_t data[32];
+	uint8_t rec_data[32];
 
 	while (1)
 	{
 		ad_init(0x00);
-		gyro_X = ad_sample();
-		ad_init(0x01);
-		gyro_Y = ad_sample();
-		ad_init(0x02);
-		gyro_Z = ad_sample();
-		ad_init(0x04);
-		temp = ad_sample();
-		Vout = temp*0.00488;
-		temp = (int)((Vout-0.5)*100);
-		datagrammeIP(data, gyro_X, gyro_Y, gyro_Z, temp);
+		send_data(data);
 
-		//printf("x: %x, y: %x, z: %x\n",gyro_X,gyro_Y,gyro_Z);
-
-		int i;
+		/*for(j=0; j<33; j++)
+		{
+		c = get_serial();
+			if(c != -1)
+			{
+				rec_data[j] = c;
+			}	
+		}
+		//printf("lol");
+		send_serial(0x12);
+		send_serial(0x12);
+		send_serial(0x12);
 		for(i=0; i<33; i++)
 		{
-			send_packet(data[i]);
+			send_serial(rec_data[i]);
 			
-		}
-		send_serial(END);
-
+		}*/
 		_delay_ms(1000); //wait 1s between the two packets
 	}
 	return 0;
