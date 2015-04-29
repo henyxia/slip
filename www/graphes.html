@@ -127,7 +127,9 @@ function file(fichier)
 function refreshCanvas()
 {
 	var from = document.getElementById("from").value;
+	from = Date.parse(from);
 	var to = document.getElementById("to").value;
+	to = Date.parse(to);
 	for(i=0; i<MAX_TEAM; i++)
 	{
 		var sortable = [];
@@ -140,14 +142,18 @@ function refreshCanvas()
 		for(var data in teamData[i])
 			sortable.push(data);
 		sortable.sort(function(a, b) {return b - a});
-		max=sortable.length < MAX_DATA ? sortable.length : MAX_DATA;
-		for(j=0; j<MAX_DATA; j++)
+		max=(sortable.length < MAX_DATA) ? sortable.length : MAX_DATA;
+		for(j=0; j<max; j++)
 		{
-			console.log(sortable[j]);
-			thisTeamDataX[dataInRange] = teamData[i][sortable[j]]["x"];
-			thisTeamDataY[dataInRange] = teamData[i][sortable[j]]["y"];
-			thisTeamDataZ[dataInRange] = teamData[i][sortable[j]]["z"];
-			thisTeamDataT[dataInRange] = teamData[i][sortable[j]]["t"];
+			console.log("Team "+i+" Index "+j+" Max "+max+" Obj Index "+sortable[j]);
+			if(dataInRange >= from && dataInRange <= to)
+			{
+				thisTeamDataX[dataInRange] = teamData[i][sortable[j]]["x"];
+				thisTeamDataY[dataInRange] = teamData[i][sortable[j]]["y"];
+				thisTeamDataZ[dataInRange] = teamData[i][sortable[j]]["z"];
+				thisTeamDataT[dataInRange] = teamData[i][sortable[j]]["t"];
+				dataInRange++;
+			}
 		}
 		if(dataInRange == 0)
 		{
