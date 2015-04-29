@@ -171,7 +171,7 @@ void processHTTPClient(void* arg)
 				fprintf(client,"HTTP/1.0 %d\r\n",code);
 				fprintf(client,"Server: PDCWeb\r\n");
 				fprintf(client,"Content-type: %s\r\n",type);
-				fprintf(client,"Content-length: 20480\r\n");
+				fprintf(client,"Content-length: 2048000\r\n");
 				fprintf(client,"\r\n");
 				fflush(client);
 				printf("Header sent\n");
