@@ -1,6 +1,8 @@
 #include <avr/io.h>
 #include <util/delay.h>
+#include <avr/interrupt.h> 	
 #include <stdio.h>
+#include <stdbool.h>
 
 #include "serial.h"
 #include "ethernet.h"
@@ -15,6 +17,99 @@
 #define	ESC		0xDB
 #define	ESC_END		0xDC
 #define	ESC_ESC		0xDD
+
+#define PRESCALER	1024
+#define TIME_SLOT 12
+#define NB_TICK	312
+#define BAUDRATE	103 // UBRR value for 9600
+
+#define NB_TASK 3
+
+#define portSAVE_CONTEXT()  \
+	asm volatile ( \
+		"push	r0				\n\t" \
+		"in	r0, __SREG__			\n\t" \
+		"push	r0				\n\t" \
+		"push	r1				\n\t" \
+		"clr	r1				\n\t" \
+		"push 	r2				\n\t" \
+		"push	r3				\n\t" \
+		"push	r4				\n\t" \
+		"push	r5				\n\t" \
+		"push	r6				\n\t" \
+		"push	r7				\n\t" \
+		"push	r8				\n\t" \
+		"push	r9				\n\t" \
+		"push	r10				\n\t" \
+		"push	r11				\n\t" \
+		"push	r12				\n\t" \
+		"push	r13				\n\t" \
+		"push	r14				\n\t" \
+		"push	r15				\n\t" \
+		"push	r16				\n\t" \
+		"push	r17				\n\t" \
+		"push	r18				\n\t" \
+		"push	r19				\n\t" \
+		"push	r20				\n\t" \
+		"push	r21				\n\t" \
+		"push	r22				\n\t" \
+		"push	r23				\n\t" \
+		"push	r24				\n\t" \
+		"push	r25				\n\t" \
+		"push	r26				\n\t" \
+		"push	r27				\n\t" \
+		"push	r28				\n\t" \
+		"push	r29				\n\t" \
+		"push	r30				\n\t" \
+		"push	r31				\n\t");
+
+
+#define portRESTORE_CONTEXT() \
+	asm volatile ( \
+		"pop	r31				\n\t" \
+		"pop	r30				\n\t" \
+		"pop	r29				\n\t" \
+		"pop	r28				\n\t" \
+		"pop	r27				\n\t" \
+		"pop	r26				\n\t" \
+		"pop	r25				\n\t" \
+		"pop	r24				\n\t" \
+		"pop	r23				\n\t" \
+		"pop	r22				\n\t" \
+		"pop	r21				\n\t" \
+		"pop	r20				\n\t" \
+		"pop	r19				\n\t" \
+		"pop	r18				\n\t" \
+		"pop	r17				\n\t" \
+		"pop	r16				\n\t" \
+		"pop	r15				\n\t" \
+		"pop	r14				\n\t" \
+		"pop	r13				\n\t" \
+		"pop	r12				\n\t" \
+		"pop	r11				\n\t" \
+		"pop	r10				\n\t" \
+		"pop	r9				\n\t" \
+		"pop	r8				\n\t" \
+		"pop	r7				\n\t" \
+		"pop	r6				\n\t" \
+		"pop	r5				\n\t" \
+		"pop	r4				\n\t" \
+		"pop	r3				\n\t" \
+		"pop	r2				\n\t" \
+		"pop	r1				\n\t" \
+		"pop	r0				\n\t" \
+		"out	__SREG__, r0			\n\t" \
+		"pop	r0				\n\t");
+
+
+typedef struct Tache {
+	int adresse;
+	bool active;
+	void (*fonction)(void);
+} Tache;
+
+uint8_t data[32];
+uint8_t rec_data[32];
 
 void send_packet(uint8_t p)
 {
@@ -62,7 +157,8 @@ int receive_packet()
     * Make sure not to copy them into the packet if we
     * run out of room.
     */
-   while(1) {
+		while(1)
+		{
            // get a character to process
            c = get_serial();
 
@@ -96,7 +192,7 @@ int receive_packet()
                            return c;
                    }
            }
-    }
+		}
 }
 
 void datagrammeIP(uint8_t data [],int x, int y, int z, int t)
@@ -179,60 +275,126 @@ void datagrammeIP(uint8_t data [],int x, int y, int z, int t)
 	data[27] = (tempChecksum & 0x000000FF);			// Checksum UDP
 }
 
-void send_data(uint8_t data [])
+void send_data()
 {
-	uint8_t gyro_X,gyro_Y,gyro_Z,temp,c;
+
+	uint8_t gyro_X,gyro_Y,gyro_Z,temp;
 	float Vout;
 	temp = 0;
 
-	gyro_X = ad_sample();
-	ad_init(0x01);
-	gyro_Y = ad_sample();
-	ad_init(0x02);
-	gyro_Z = ad_sample();
-	ad_init(0x04);
-	temp = ad_sample();
-	Vout = temp*0.01953;
-	temp = (int)((Vout-0.5)*100);
-	datagrammeIP(data, gyro_X, gyro_Y, gyro_Z, temp);
+	while(1)
+	{
+		ad_init(0x00);
+		gyro_X = ad_sample();
+		ad_init(0x01);
+		gyro_Y = ad_sample();
+		ad_init(0x02);
+		gyro_Z = ad_sample();
+		ad_init(0x04);
+		temp = ad_sample();
+		Vout = temp*0.01953;
+		temp = (int)((Vout-0.5)*100);
+		datagrammeIP(data, gyro_X, gyro_Y, gyro_Z, temp);
 
-	int i,j=0;
+		int i;
+		for(i=0; i<33; i++)
+		{
+			send_packet(data[i]);		
+		}
+		send_serial(END);
+		_delay_ms(200); //wait 1s between the two packets
+	}
+}
+
+void receive_data()
+{
+	char c;
+	int i=0;
+	c = receive_packet();
+	while (c !=-1)
+	{
+		c = receive_packet();
+		rec_data[i] = c;
+		i++;
+	}
+	send_serial(0x55);
+	send_serial(0x55);
+	send_serial(0x55);
+	
 	for(i=0; i<33; i++)
 	{
-		send_packet(data[i]);		
+		send_serial(rec_data[i]);		
 	}
-	send_serial(END);
 }
+
+void init_task_led(void)
+{
+	DDRB = 0x10;
+}
+
+void blink_led()
+{
+	while(1)
+	{
+		PORTB &= 0xef;	//Blinking the LED at 1Hz
+		_delay_ms(100);
+		PORTB |= 0x10;
+		_delay_ms(100);
+	}
+}
+
+Tache taches[NB_TASK] = {
+	{0x500,0,blink_led},
+	{0x600,0,send_data},
+	{0x700,0,receive_data}
+};
+
+int tache_courante = 0;
+
+void scheduler()
+{
+	tache_courante++;
+	tache_courante = tache_courante % NB_TASK;
+}
+
+void init_timer()
+{
+	TCCR1B |= _BV(WGM12); // CTC mode with value in OCR1A 
+	TCCR1B |= _BV(CS12);  // CS12 = 1; CS11 = 0; CS10 =1 => CLK/1024 prescaler
+	TCCR1B |= _BV(CS10);
+	OCR1A   = NB_TICK;
+	TIMSK1 |= _BV(OCIE1A);
+}
+
+ISR(TIMER1_COMPA_vect)
+{
+	if(taches[tache_courante].active){
+		portSAVE_CONTEXT();
+		taches[tache_courante].adresse=SP;
+	}
+	scheduler();
+	SP = taches[tache_courante].adresse;
+	if(taches[tache_courante].active){
+		portRESTORE_CONTEXT();
+	} else {
+		taches[tache_courante].active = 1;
+		sei();
+		taches[tache_courante].fonction();
+	}
+}
+
 
 int main(void)
 {
+	init_timer();
 	init_printf();
-	uint8_t data[32];
-	uint8_t rec_data[32];
+	init_task_led();
 
-	while (1)
+	sei();
+	while(1)
 	{
-		ad_init(0x00);
-		send_data(data);
 
-		/*for(j=0; j<33; j++)
-		{
-		c = get_serial();
-			if(c != -1)
-			{
-				rec_data[j] = c;
-			}	
-		}
-		//printf("lol");
-		send_serial(0x12);
-		send_serial(0x12);
-		send_serial(0x12);
-		for(i=0; i<33; i++)
-		{
-			send_serial(rec_data[i]);
-			
-		}*/
-		_delay_ms(1000); //wait 1s between the two packets
 	}
+	cli();
 	return 0;
 }
