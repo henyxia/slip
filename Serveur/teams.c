@@ -12,7 +12,7 @@ char teams[MAX_TEAMS][25] = {"Jean & Flavien",
 	"Mehdi & Thibault",
 	"Romain & Alexandre",
 	"Sandra & Elise",
-	"Hideo",
+	"Hideo & Jerome",
 	"Arnaud"};
 
 void initTeams(void)

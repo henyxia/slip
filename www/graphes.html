@@ -100,6 +100,7 @@
 		<script>
 // Constants
 MAX_TEAM=11;
+MAX_DATA=150;
 DATA_TYPE=['X', 'Y', 'Z', 'T'];
 
 // Global
@@ -125,22 +126,56 @@ function file(fichier)
 // Canvas function
 function refreshCanvas()
 {
+	var from = document.getElementById("from").value;
+	var to = document.getElementById("to").value;
 	for(i=0; i<MAX_TEAM; i++)
 	{
-		for(j=0; j<4; j++)
+		var sortable = [];
+		var thisTeamDataX = [];
+		var thisTeamDataY = [];
+		var thisTeamDataZ = [];
+		var thisTeamDataT = [];
+		var dataInRange = 0;
+		var max = 0;
+		for(var data in teamData[i])
+			sortable.push(data);
+		sortable.sort(function(a, b) {return b - a});
+		max=sortable.length < MAX_DATA ? sortable.length : MAX_DATA;
+		for(j=0; j<MAX_DATA; j++)
 		{
-			var c = document.getElementById("canvas_"+i+"_"+DATA_TYPE[j]);
-			var ctx = c.getContext("2d");
-			ctx.setTransform(1, 0, 0, 1, 0, 0);
-			ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
-			ctx.fillStyle = "#FF0000";
-			ctx.font = "30px Arial";
-			ctx.fillText("No Data",20,35);
-			//var ctx = c.getContext("2d");
-			//ctx.beginPath();
-			//ctx.moveTo(0, 150);
-			//ctx.lineTo(0, 100);
-			//ctx.stroke();
+			console.log(sortable[j]);
+			thisTeamDataX[dataInRange] = teamData[i][sortable[j]]["x"];
+			thisTeamDataY[dataInRange] = teamData[i][sortable[j]]["y"];
+			thisTeamDataZ[dataInRange] = teamData[i][sortable[j]]["z"];
+			thisTeamDataT[dataInRange] = teamData[i][sortable[j]]["t"];
+		}
+		if(dataInRange == 0)
+		{
+			for(j=0; j<4; j++)
+			{
+				var c = document.getElementById("canvas_"+i+"_"+DATA_TYPE[j]);
+				var ctx = c.getContext("2d");
+				ctx.setTransform(1, 0, 0, 1, 0, 0);
+				ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
+				ctx.fillStyle = "#FF0000";
+				ctx.font = "30px Arial";
+				ctx.fillText("No Data",20,35);
+			}
+		}
+		else
+		{
+			for(j=0; j<4; j++)
+			{
+				var c = document.getElementById("canvas_"+i+"_"+DATA_TYPE[j]);
+				var ctx = c.getContext("2d");
+				ctx.setTransform(1, 0, 0, 1, 0, 0);
+				ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
+				//var ctx = c.getContext("2d");
+				//ctx.beginPath();
+				//ctx.moveTo(0, 150);
+				//ctx.lineTo(0, 100);
+				//ctx.stroke();
+			}
 		}
 	}
 }
