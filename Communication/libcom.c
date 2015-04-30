@@ -6,7 +6,6 @@
 #include <errno.h>
 #include <netdb.h>
 #include <string.h>
-
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
@@ -14,6 +13,8 @@
 #include <netinet/tcp.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
+#include <unistd.h>
+#include <netdb.h>
 
 #include <stdbool.h>
 
@@ -90,12 +91,55 @@ void serveurMessages(void (*func)(unsigned char *, int))
 		message[nboctets]='\0';
 		printf("Message SND %02X%02X%02X%02X%02X\n", message[4], message[3], message[2], message[1], message[0]);
 		if(nboctets==MSG_LENGTH)
-			newUDPClient(message, 0);
+			func(message, 0);
+			//newUDPClient(message, 0);
 	}
 }
 
-int envoiMessage(int sock, unsigned char* str, int size)
+int envoiMessage(int port, unsigned char* str, int size)
 {
+#ifdef DEBUG
+	printf("Initializing sending socket\n");
+#endif
+	struct sockaddr_in sin = { 0 };
+	int sock = socket(AF_INET, SOCK_DGRAM, 0);
+	struct hostent *hostinfo;
+
+	if(sock == SOCKET_ERROR)
+	{
+		printf("Error with socket\n");
+		return 1;
+	}
+
+	hostinfo = gethostbyname("172.26.79.255");
+	if (hostinfo == NULL)
+	{
+		printf("Unable to resolve this address\n");
+		return 2;
+	}
+
+	sin.sin_addr = *(struct in_addr *) hostinfo->h_addr;
+	sin.sin_port = htons(port);
+	sin.sin_family = AF_INET;
+
+	int yep = 1;
+	if(setsockopt(sock, SOL_SOCKET, SO_BROADCAST, &yep, sizeof(yep))<0)
+	{
+		printf("Unable to put broadcast flag\n");
+		return 3;
+	}
+
+	if(sendto(sock, str, size, 0, (struct sockaddr *) &sin, sizeof(sin)) < 0)
+	{
+		printf("Fail to send the message\n");
+		return 4;
+	}
+#ifdef DEBUG
+	else
+		printf("Data send successfully\n");
+#endif
+	close(sock);
+
 	return 0;
 }
 

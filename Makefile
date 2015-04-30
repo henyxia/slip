@@ -5,7 +5,7 @@ export CLIB = ar cq
 export CFLAGS = -Wall
 
 #Working Dirs
-DIRS=Communication Threads Serveur
+DIRS=Communication Threads Serveur flood
 
 #Main Target
 all: $(patsubst %, _dir_%, $(DIRS))
