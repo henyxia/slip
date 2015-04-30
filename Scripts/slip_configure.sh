@@ -8,4 +8,4 @@ ip address add dev sl0 172.26.79.200 peer 172.26.79.201
 echo 1 > /proc/sys/net/ipv4/ip_forward
 echo 1 > /proc/sys/net/ipv4/conf/all/proxy_arp
 ip route add 172.26.79.201/32 dev sl0
-socat UDP-RECVFROM:12345,fork,so-bindtodevice=sl0 UDP-DATAGRAM:172.26.79.255:12345,sp=54321,reuseaadr,broadcast &
+socat UDP-RECVFROM:42001,fork,so-bindtodevice=sl0 UDP-DATAGRAM:172.26.79.255:12345,sp=54321,reuseaddr,broadcast &
