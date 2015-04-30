@@ -101,6 +101,8 @@
 // Constants
 MAX_TEAM=11;
 MAX_DATA=150;
+MAX_UINT=255;
+MAX_HEIGHT=50;
 DATA_TYPE=['X', 'Y', 'Z', 'T'];
 
 // Global
@@ -127,16 +129,13 @@ function file(fichier)
 function refreshCanvas()
 {
 	var from = document.getElementById("from").value;
-	from = Date.parse(from);
+	from = Date.parse(from) / 1000;
 	var to = document.getElementById("to").value;
-	to = Date.parse(to);
+	to = Date.parse(to) / 1000;
 	for(i=0; i<MAX_TEAM; i++)
 	{
 		var sortable = [];
-		var thisTeamDataX = [];
-		var thisTeamDataY = [];
-		var thisTeamDataZ = [];
-		var thisTeamDataT = [];
+		var thisTeamData = [];
 		var dataInRange = 0;
 		var max = 0;
 		for(var data in teamData[i])
@@ -145,16 +144,19 @@ function refreshCanvas()
 		max=(sortable.length < MAX_DATA) ? sortable.length : MAX_DATA;
 		for(j=0; j<max; j++)
 		{
-			console.log("Team "+i+" Index "+j+" Max "+max+" Obj Index "+sortable[j]);
-			if(dataInRange >= from && dataInRange <= to)
+			//DEBUG
+			//console.log("Team "+i+" Index "+j+" Max "+max+" Obj Index "+sortable[j]+" Min "+from+" Max "+to);
+			if(sortable[j] >= from && sortable[j] <= to)
 			{
-				thisTeamDataX[dataInRange] = teamData[i][sortable[j]]["x"];
-				thisTeamDataY[dataInRange] = teamData[i][sortable[j]]["y"];
-				thisTeamDataZ[dataInRange] = teamData[i][sortable[j]]["z"];
-				thisTeamDataT[dataInRange] = teamData[i][sortable[j]]["t"];
+				thisTeamData[dataInRange] = [];
+				thisTeamData[dataInRange][DATA_TYPE[0]] = teamData[i][sortable[j]]["x"];
+				thisTeamData[dataInRange][DATA_TYPE[1]] = teamData[i][sortable[j]]["y"];
+				thisTeamData[dataInRange][DATA_TYPE[2]] = teamData[i][sortable[j]]["z"];
+				thisTeamData[dataInRange][DATA_TYPE[3]] = teamData[i][sortable[j]]["t"];
 				dataInRange++;
 			}
 		}
+		console.log("Team "+i+" Data in range "+dataInRange);
 		if(dataInRange == 0)
 		{
 			for(j=0; j<4; j++)
@@ -176,11 +178,13 @@ function refreshCanvas()
 				var ctx = c.getContext("2d");
 				ctx.setTransform(1, 0, 0, 1, 0, 0);
 				ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
-				//var ctx = c.getContext("2d");
-				//ctx.beginPath();
-				//ctx.moveTo(0, 150);
-				//ctx.lineTo(0, 100);
-				//ctx.stroke();
+				for(k=0; k<dataInRange; k++)
+				{
+					ctx.beginPath();
+					ctx.moveTo(k, MAX_HEIGHT);
+					ctx.lineTo(k, MAX_HEIGHT-(thisTeamData[k][DATA_TYPE[j]]*MAX_HEIGHT/MAX_UINT));
+					ctx.stroke();
+				}
 			}
 		}
 	}
