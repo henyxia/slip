@@ -18,7 +18,7 @@ int main(void)
 		data[3] = rand() % 255;
 		data[4] = rand() % 255;
 		envoiMessage(12345, data, sizeof(data));
-		usleep(10000);
+		usleep(1000);
 	}
 
 	return 0;
