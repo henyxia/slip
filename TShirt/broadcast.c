@@ -331,8 +331,11 @@ void receive_data()
 		if(i != 34)
 		{
 			send_serial(i);
+			sei();
 			continue;
 		}
+		else if(i == 34)
+			while(get_serial() != -1);
 		
 		for(i=0; i<33; i++)
 		{
