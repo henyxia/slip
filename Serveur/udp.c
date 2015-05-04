@@ -91,7 +91,7 @@ void processUDPClient(void *arg)
 		blinkDontDie[0] = (message[0] >> 4) + checkParity(blinkDontDie[4]);
 		envoiMessage(12345, blinkDontDie, sizeof(blinkDontDie));
 #ifdef DEBUG
-		printf(" \u21B3 Blinking time ! (CMD %05X\n", blinkDontDie);
+		printf(" \u21B3 Blinking time ! (CMD %05X\n", blinkDontDie[4]);
 #endif
 	}
 	else
