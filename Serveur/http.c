@@ -8,6 +8,7 @@
 #include <stdbool.h>
 #include <libthrd.h>
 #include <errno.h>
+#include <time.h>
 #include "http.h"
 #include "teams.h"
 
@@ -78,14 +79,22 @@ void processHTTPClient(void* arg)
 	int sock = *tmp;
 	printf("New HTTP Client (sock %d)\n", sock);
 
-	char	buffer[MAX_BUFFER];
-	char	cmd[MAX_BUFFER];
-	char	page[MAX_BUFFER];
-	char	proto[MAX_BUFFER];
-	char	path[MAX_BUFFER];
-	char	type[MAX_BUFFER];
-	FILE*	webpage = NULL;
-	FILE*	client = NULL;
+	char		buffer[MAX_BUFFER];
+	FILE*		client = NULL;
+	char		cmd[MAX_BUFFER];
+	char		date[MAX_BUFFER];
+	char		page[MAX_BUFFER];
+	char		proto[MAX_BUFFER];
+	char		path[MAX_BUFFER];
+	time_t		rawtime;
+	struct tm*	timeinfo;
+	char		type[MAX_BUFFER];
+	FILE*		webpage = NULL;
+
+	// Generating date response
+	time (&rawtime);
+	timeinfo = localtime (&rawtime);
+	strftime(date, MAX_BUFFER, "%a, %d %b %Y %X %Z", timeinfo);
 
 	printf("Creating file descriptor\n");
 
@@ -155,6 +164,7 @@ void processHTTPClient(void* arg)
 					fprintf(client,"HTTP/1.0 %d\r\n",code);
 					fprintf(client,"Server: PDCWeb\r\n");
 					fprintf(client,"Content-type: %s\r\n",type);
+					fprintf(client,"Date: %s\r\n",date);
 					fprintf(client,"Content-length: 4\r\n");
 					fprintf(client,"\r\n");
 					fflush(client);
@@ -171,6 +181,7 @@ void processHTTPClient(void* arg)
 				fprintf(client,"HTTP/1.0 %d\r\n",code);
 				fprintf(client,"Server: PDCWeb\r\n");
 				fprintf(client,"Content-type: %s\r\n",type);
+				fprintf(client,"Date: %s\r\n",date);
 				fprintf(client,"Content-length: 2048000\r\n");
 				fprintf(client,"\r\n");
 				fflush(client);
@@ -198,11 +209,6 @@ void processHTTPClient(void* arg)
 				fclose(webpage);
 				V(teamNumber);
 				return;
-
-
-
-
-
 			}
 			else
 				printf("This JSON will not be generated\n");
@@ -210,6 +216,7 @@ void processHTTPClient(void* arg)
 		fprintf(client,"HTTP/1.0 %d\r\n",code);
 		fprintf(client,"Server: PDCWeb\r\n");
 		fprintf(client,"Content-type: %s\r\n",type);
+		fprintf(client,"Date: %s\r\n",date);
 		fprintf(client,"Content-length: %d\r\n", (int)fstat.st_size);
 		fprintf(client,"\r\n");
 		fflush(client);
