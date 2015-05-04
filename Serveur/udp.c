@@ -40,8 +40,8 @@ void processUDPClient(void *arg)
 	message[1] = myMessage->message[1];
 	message[0] = myMessage->message[0];
 
-	int team = message[0] >> 4;
-	if(team < 0 || team >= MAX_TEAMS)
+	int teamNumber = message[0] >> 4;
+	if(teamNumber < 0 || teamNumber >= MAX_TEAMS)
 	{
 #ifdef DEBUG
 		printf(" \u21B3 Wrong team number\n");
@@ -72,10 +72,10 @@ void processUDPClient(void *arg)
 #endif
 		return;
 	}
-	if(checkParity(message[4] + (message[0] & 0x01)))
+	if(checkParity(message[4]) != (message[0] & 0x01))
 	{
 #ifdef DEBUG
-		printf(" \u21B3 T Parity error\n");
+		printf(" \u21B3 T Parity error M %02X P %02X T %02X\n", message[4], message[0] & 0x01, (message[4] + (message[0] & 0x01)));
 #endif
 		return;
 	}
@@ -104,6 +104,7 @@ void processUDPClient(void *arg)
 		P(message[0] >> 4);
 		FILE* teamFile = NULL;
 		char teamFileName[MAX_TEAM_FILE];
+		team* thisTeam = getTeamValues(message[0] >> 4);
 		sprintf(teamFileName, "team%d.bin", message[0] >> 4);
 		teamFile = fopen(teamFileName, "ab");
 		if(teamFile == NULL)
@@ -111,7 +112,7 @@ void processUDPClient(void *arg)
 			printf("Unable to open the team %d log\n", message[0] >> 4);
 			return;
 		}
-		fwrite(getTeamValues(message[0] >> 4), sizeof(team), 1, teamFile);
+		fwrite(thisTeam, sizeof(*thisTeam), 1, teamFile);
 		fclose(teamFile);
 		V(message[0] >> 4);
 	}
