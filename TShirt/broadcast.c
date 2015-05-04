@@ -109,7 +109,6 @@ typedef struct Tache {
 } Tache;
 
 uint8_t data[32];
-uint8_t rec_data[32];
 int period=100; //x10-2 seconds
 
 void send_packet(uint8_t p)
@@ -313,6 +312,7 @@ void send_data()
 
 void receive_data()
 {
+	uint8_t rec_data[32];
 	char c=0x00;
 	int i=1;
 	while(1)
@@ -320,17 +320,22 @@ void receive_data()
 		get_serial();
 		cli();
 		c = receive_packet();
+		send_serial(c);
 		rec_data[0] = c;
 		while (c !=-1)
 		{
 			c = receive_packet();
-			rec_data[i] = c;
-			i++;
+			if(c != -1)
+			{
+				rec_data[i] = c;
+				send_serial(c);
+				i++;
+			}
 		}
 		
-		for(i=0; i<33; i++)
+		for(i=0; i<32; i++)
 		{
-			send_serial(rec_data[i]);		
+			//send_serial(rec_data[i]);
 		}
 		sei();
 	}
@@ -375,8 +380,8 @@ void blink_led()
 
 Tache taches[NB_TASK] = {
 	{0x500,0,blink_led},
-	{0x600,0,send_data},
-	{0x700,0,receive_data}
+	{0x700,0,send_data},
+	{0x600,0,receive_data}
 };
 
 int tache_courante = 0;
