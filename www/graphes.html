@@ -180,10 +180,13 @@ function refreshCanvas()
 				ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
 				for(k=0; k<dataInRange; k++)
 				{
-					ctx.beginPath();
-					ctx.moveTo(k, MAX_HEIGHT);
-					ctx.lineTo(k, MAX_HEIGHT-(thisTeamData[k][DATA_TYPE[j]]*MAX_HEIGHT/MAX_UINT));
-					ctx.stroke();
+					if(k%2)
+					{
+						ctx.beginPath();
+						ctx.moveTo(k, MAX_HEIGHT);
+						ctx.lineTo(k, MAX_HEIGHT-(thisTeamData[k][DATA_TYPE[j]]*MAX_HEIGHT/MAX_UINT));
+						ctx.stroke();
+					}
 				}
 			}
 		}
