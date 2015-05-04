@@ -82,14 +82,20 @@ void serveurMessages(void (*func)(unsigned char *, int))
 	printf("UDP Socket Internal %d\n", sServ);
 	while(!stop)
 	{
+#ifdef DEBUG
 		printf("Waiting for events\n");
+#endif
 		struct sockaddr_storage adresse;
 		socklen_t taille=sizeof(adresse);
 		unsigned char message[MSG_LENGTH];
 		int nboctets=recvfrom(sServ,message,MSG_LENGTH,0,(struct sockaddr *)&adresse,&taille);
+#ifdef DEBUG
 		printf("New message recieved (%d length)\n", nboctets);
+#endif
 		message[nboctets]='\0';
+#ifdef DEBUG
 		printf("Message SND %02X%02X%02X%02X%02X\n", message[4], message[3], message[2], message[1], message[0]);
+#endif
 		if(nboctets==MSG_LENGTH)
 			func(message, 0);
 			//newUDPClient(message, 0);
