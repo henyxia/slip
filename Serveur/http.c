@@ -29,8 +29,9 @@ void interpreter(FILE* webpage, FILE* client)
 	unsigned char	buf = fgetc(webpage);
 	char			buffer[MAX_BUFFER];
 	int				cmdLen = 0;
-	int				team;
-	char			query;
+	int				team = 0;
+	char			query = 0;
+	int				ret = -1;
 
 	while(cmdLen < MAX_BUFFER && !feof(webpage) && acceptableVarChar(buf))
 	{
@@ -51,7 +52,12 @@ void interpreter(FILE* webpage, FILE* client)
 	}
 	else
 	{
-		if(sscanf(buffer, "TEAMS_%d_%c", &team, &query) != 2)
+		ret = sscanf(
+				buffer,
+				"TEAMS_%d_%c",
+				&team,
+				&query);
+		if(ret != 2)
 		{
 			fprintf(client, "<br/>Command recieved %s, %d char long, but not recognized<br/>", buffer, cmdLen);
 			return;
@@ -239,6 +245,7 @@ void processHTTPClient(void* arg)
 	else
 		printf("This command is not supported yet\n");
 
+	fclose(webpage);
 	fclose(client);
 }
 
