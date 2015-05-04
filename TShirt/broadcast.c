@@ -312,30 +312,31 @@ void send_data()
 
 void receive_data()
 {
-	uint8_t rec_data[32];
+	uint8_t rec_data[33];
 	char c=0x00;
-	int i=1;
+	int i=0;
 	while(1)
 	{
 		get_serial();
 		cli();
-		c = receive_packet();
-		send_serial(c);
-		rec_data[0] = c;
-		while (c !=-1)
+		do
 		{
 			c = receive_packet();
-			if(c != -1)
-			{
-				rec_data[i] = c;
-				send_serial(c);
-				i++;
-			}
+			//send_serial(c);
+			rec_data[i] = c;
+			i++;
+		}
+		while(c !=-1 && i<34);
+
+		if(i != 34)
+		{
+			send_serial(i);
+			continue;
 		}
 		
-		for(i=0; i<32; i++)
+		for(i=0; i<33; i++)
 		{
-			//send_serial(rec_data[i]);
+			send_serial(rec_data[i]);
 		}
 		sei();
 	}
