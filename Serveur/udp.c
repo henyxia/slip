@@ -7,6 +7,7 @@
 #include <netdb.h>
 #include <string.h>
 #include <libthrd.h>
+#include <libcom.h>
 #include "udp.h"
 #include "teams.h"
 #include "parity.h"
@@ -42,33 +43,55 @@ void processUDPClient(void *arg)
 	int team = message[0] >> 4;
 	if(team < 0 || team >= MAX_TEAMS)
 	{
-		printf("\tWrong team number");
-		//return -1;
+#ifdef DEBUG
+		printf(" \u21B3 Wrong team number\n");
+#endif
+		return;
 	}
 	printf("Team %d (aka %s)\n", message[0] >> 4, getTeamMembers(message[0] >> 4));
 	if(checkParity(message[1] + ((message[0] & 0x08) >> 3)))
 	{
+#ifdef DEBUG
 		printf(" \u21B3 X Parity error (X:%02x p:%02x t:%02x)\n", message[1], ((message[0] & 0x08) >> 3), (message[1] + ((message[0] & 0x08) >> 3)));
-		//return -2;
+#endif
+		return;
 	}
 	if(checkParity(message[2] + ((message[0] & 0x04) >> 2)))
 	{
+#ifdef DEBUG
 		printf(" \u21B3 Y Parity error\n");
-		//return -3;
+#endif
+		return;
 	}
 	if(checkParity(message[3] + ((message[0] & 0x02) >> 1)))
 	{
+#ifdef DEBUG
 		printf(" \u21B3 Z Parity error\n");
-		//return -4;
+#endif
+		return;
 	}
 	if(checkParity(message[4] + (message[0] & 0x01)))
 	{
+#ifdef DEBUG
 		printf(" \u21B3 T Parity error\n");
-		//return -5;
+#endif
+		return;
 	}
 
 	if(((message[0] & 0x0F) == 0x0F) && (message[1] == 0xFF) && (message[2] == 0xFF) && (message[3] == 0xFF) && (message[4] == 0xFF))
-		printf(" \u21B3 Somebody died\n");
+	{
+		printf(" \u21B3 Somebody died in team %d\n", message[0] >> 4);
+		unsigned char blinkDontDie[] = "azert";
+		blinkDontDie[1] = 0;
+		blinkDontDie[2] = 0;
+		blinkDontDie[3] = 0;
+		blinkDontDie[4] = 50;
+		blinkDontDie[0] = (message[0] >> 4) + checkParity(blinkDontDie[4]);
+		envoiMessage(12345, blinkDontDie, sizeof(blinkDontDie));
+#ifdef DEBUG
+		printf(" \u21B3 Blinking time ! (CMD %05X\n", blinkDontDie);
+#endif
+	}
 	else
 	{
 		printf(" \u21B3 X:%04d Y:%04d Z:%04d\n", message[1], message[2], message[3]);
