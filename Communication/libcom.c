@@ -151,6 +151,60 @@ int envoiMessage(int port, unsigned char* str, int size)
 
 int envoiMessageUnicast(int target, int destIp, unsigned char* str, int size)
 {
+#ifdef DEBUG
+	printf("Initializing sending socket Unicast\n");
+#endif
+	struct sockaddr_in sin = { 0 };
+	int sock = socket(AF_INET, SOCK_DGRAM, 0);
+	struct hostent *hostinfo;
+	int ip1,ip2,ip3,ip4;
+	char ip[255];	
+
+	if(sock == SOCKET_ERROR)
+	{
+		printf("Error with socket\n");
+		return 1;
+	}
+	
+	//"Casting" destIP from int to string
+	ip4 = destIp & 0xff;
+	ip3 = (destIp >> 8) & 0xff;
+	ip2 = (destIp >> 16) & 0xff;
+	ip1 = (destIp >> 24) & 0xff;
+	sprintf(ip,"%d.%d.%d.%d",ip1,ip2,ip3,ip4);
+#ifdef DEBUG
+	printf("Ip = %s\n",ip);
+#endif
+
+	hostinfo = gethostbyname(ip);
+	if (hostinfo == NULL)
+	{
+		printf("Unable to resolve this address\n");
+		return 2;
+	}
+
+	sin.sin_addr = *(struct in_addr *) hostinfo->h_addr;
+	sin.sin_port = htons(target);
+	sin.sin_family = AF_INET;
+
+	int yep = 1;
+	if(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &yep, sizeof(yep))<0)
+	{
+		printf("Unable to put reuse ip flag\n");
+		return 3;
+	}
+
+	if(sendto(sock, str, size, 0, (struct sockaddr *) &sin, sizeof(sin)) < 0)
+	{
+		printf("Fail to send the message\n");
+		return 4;
+	}
+#ifdef DEBUG
+	else
+		printf("Data send successfully\n");
+#endif
+	close(sock);
+
 	return 0;
 }
 
