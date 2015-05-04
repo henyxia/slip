@@ -138,5 +138,6 @@ void newUDPClient(unsigned char* message, int sock)
 	}
 
 	newThread(processUDPClient, myMessage, sizeof(UDPMessage));
+	free(myMessage);
 }
 
