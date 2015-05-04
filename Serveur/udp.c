@@ -48,7 +48,9 @@ void processUDPClient(void *arg)
 #endif
 		return;
 	}
+#ifdef DEBUG
 	printf("Team %d (aka %s)\n", message[0] >> 4, getTeamMembers(message[0] >> 4));
+#endif
 	if(checkParity(message[1] + ((message[0] & 0x08) >> 3)))
 	{
 #ifdef DEBUG
