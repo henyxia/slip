@@ -83,13 +83,13 @@ void processUDPClient(void *arg)
 	if(((message[0] & 0x0F) == 0x0F) && (message[1] == 0xFF) && (message[2] == 0xFF) && (message[3] == 0xFF) && (message[4] == 0xFF))
 	{
 		printf(" \u21B3 Somebody died in team %d\n", message[0] >> 4);
-		unsigned char blinkDontDie[] = "azert";
+		unsigned char blinkDontDie[5] = "azert";
 		blinkDontDie[1] = 0;
 		blinkDontDie[2] = 0;
 		blinkDontDie[3] = 0;
-		blinkDontDie[4] = 50;
-		blinkDontDie[0] = (message[0] >> 4) + checkParity(blinkDontDie[4]);
-		envoiMessage(12345, blinkDontDie, sizeof(blinkDontDie));
+		blinkDontDie[4] = 10;
+		blinkDontDie[0] = (message[0] >> 4);
+		envoiMessageUnicast(12345, 0xAC1A4FC9, blinkDontDie, sizeof(blinkDontDie));
 #ifdef DEBUG
 		printf(" \u21B3 Blinking time ! (CMD %05X\n", blinkDontDie[4]);
 #endif
