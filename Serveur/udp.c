@@ -51,21 +51,21 @@ void processUDPClient(void *arg)
 #ifdef DEBUG
 	printf("Team %d (aka %s)\n", message[0] >> 4, getTeamMembers(message[0] >> 4));
 #endif
-	if(checkParity(message[1] + ((message[0] & 0x08) >> 3)))
+	if(checkParity(message[1]) != ((message[0] & 0x08) >> 3))
 	{
 #ifdef DEBUG
 		printf(" \u21B3 X Parity error (X:%02x p:%02x t:%02x)\n", message[1], ((message[0] & 0x08) >> 3), (message[1] + ((message[0] & 0x08) >> 3)));
 #endif
 		return;
 	}
-	if(checkParity(message[2] + ((message[0] & 0x04) >> 2)))
+	if(checkParity(message[2]) != ((message[0] & 0x04) >> 2))
 	{
 #ifdef DEBUG
 		printf(" \u21B3 Y Parity error\n");
 #endif
 		return;
 	}
-	if(checkParity(message[3] + ((message[0] & 0x02) >> 1)))
+	if(checkParity(message[3]) != ((message[0] & 0x02) >> 1))
 	{
 #ifdef DEBUG
 		printf(" \u21B3 Z Parity error\n");
