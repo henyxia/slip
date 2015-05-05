@@ -109,8 +109,7 @@ typedef struct Tache {
 } Tache;
 
 uint8_t data[32];
-int period=100; //x10-2 seconds
-bool blink=0;
+int period=256; //x10-2 seconds
 
 void send_packet(uint8_t p)
 {
@@ -272,7 +271,8 @@ void datagrammeIP(uint8_t data [],int x, int y, int z, int t)
 	data[30] = y; // Y
 	data[31] = z; // Z
 	data[32] = t; // T
-	data[28] = 0x00 | (checkParity(x) << 3) | (checkParity(y) << 2) | (checkParity(z) << 1) | (checkParity(t));
+	data[28] &= 0xf0;
+	data[28] |= (checkParity(x) << 3) | (checkParity(y) << 2) | (checkParity(z) << 1) | (checkParity(t));
 
 	tempChecksum = 0;
 	tempChecksum += (((uint32_t)data[12]) << 8) + data[13]; // IP Src
@@ -336,16 +336,18 @@ void send_data()
 void process_request(uint8_t * rec_data)
 {
 	//TODO test parity
-	if((rec_data[28] & 0xf0) == 0x00)
+	if((rec_data[28] & 0xf0) == (data[28] & 0xf0))
 	{
+	    send_serial(0xee);
 		if((rec_data[29] == 0x00) && (rec_data[30] == 0x00) && (rec_data[31] == 0x00))
-		{
+		{	
+			send_serial(0xdd);
 			period = rec_data[32];
-			blink = 1;
 		}
 		else if((rec_data[30] == 0x00) && (rec_data[31] == 0x00) && (rec_data[32] == 0x00))
 		{
-			data[28] = (rec_data[28] & 0xf0);
+			send_serial(0xcc);
+			data[28] = ((rec_data[29] & 0x0f) << 4);
 		}
 	}
 }
@@ -408,7 +410,8 @@ void blink_led()
 	int period_cs;
 	while(1)
 	{
-		if(blink)
+	PORTB &= 0xef;
+		if(period != 256)
 		{
 			period_cs = (period)/10;
 			PORTB &= 0xef;	//Blinking the LED at 1Hz
@@ -462,6 +465,7 @@ ISR(TIMER1_COMPA_vect)
 
 int main(void)
 {
+	data[28] = 0;
 	init_timer();
 	init_printf();
 	init_task_led();
