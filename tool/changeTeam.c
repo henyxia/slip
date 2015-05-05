@@ -9,7 +9,7 @@
 int main(void)
 {
 	unsigned char data[CMD_SIZE] = "azert";
-	char stop[10];
+	int i;
 	int teamOld;
 	int teamNew;
 	printf("Do you want to change the team number ?\n");
@@ -32,12 +32,11 @@ int main(void)
 	data[3] = 0;
 	data[4] = 0;
 
-	do
+	for(i=0; i<10; i++)
 	{
-		printf("Stop ? y/N");
-		scanf("%c", &stop[0]);
 		envoiMessageUnicast(54321, 0xAC1A4FC9, data, sizeof(data));
-	}while(stop[0]!='y');
+		usleep(10000);
+	}
 
 	return 0;
 }
