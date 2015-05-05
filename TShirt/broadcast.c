@@ -312,12 +312,13 @@ void send_data()
 
 void receive_data()
 {
-	uint8_t rec_data[33];
+	uint8_t rec_data[34];
 	char c=0x00;
 	int i=0;
 	while(1)
 	{
-		get_serial();
+		c = get_serial();
+		send_serial(c);
 		cli();
 		do
 		{
@@ -331,25 +332,23 @@ void receive_data()
 		if(i != 34)
 		{
 			send_serial(i);
-			sei();
-			continue;
 		}
-		else if(i == 34)
-			while(get_serial() != -1);
-		
-		for(i=0; i<33; i++)
+		else
 		{
-			send_serial(rec_data[i]);
+			send_serial('a');
+			if(c != -1)
+				while(get_serial() != -1);
+			for(i=0; i<33; i++)
+				send_serial(rec_data[i]);
 		}
 		sei();
 	}
-
 }
 
 void process_request()
 {
 	/*//TODO test parity
-	if((rec_data[28] & 0xf0) == 0x00))
+	if((rec_data[28] & 0xf0) == 0x00)
 	{
 		
 	}*/
