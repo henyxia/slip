@@ -110,6 +110,7 @@ typedef struct Tache {
 
 uint8_t data[32];
 int period=100; //x10-2 seconds
+//bool blink=0;
 
 void send_packet(uint8_t p)
 {
@@ -310,13 +311,26 @@ void send_data()
 	}
 }
 
+void process_request(uint8_t * rec_data)
+{
+	//TODO test parity
+	if((rec_data[28] & 0xf0) == 0x30)
+	{
+		if((rec_data[29] == 0x30) && (rec_data[30] == 0x30) && (rec_data[31] == 0x30))
+		{
+			period = rec_data[32];
+			//blink = 1;
+		}
+	}
+}
+
 void receive_data()
 {
 	uint8_t rec_data[34];
 	char c=0x00;
-	int i=0;
 	while(1)
 	{
+		int i=0;
 		get_serial();
 		//send_serial(c);
 		cli();
@@ -324,35 +338,29 @@ void receive_data()
 		{
 			c = receive_packet();
 			//send_serial(c);
-			rec_data[i] = c;
+			if(c!=-1)
+				rec_data[i] = c;
 			i++;
 		}
 		while(c !=-1 && i<34);
 
 		if(i != 34)
 		{
-			send_serial(i);
+			//send_serial(i);
 		}
 		else
 		{
 			//send_serial('a');
+			/*
 			if(c != -1)
 				while((UCSR0A & (1  << RXC0)) >> RXC0)
-						get_serial();
+						get_serial();*/
 			for(i=0; i<33; i++)
 				send_serial(rec_data[i]);
+			//process_request(rec_data);
 		}
 		sei();
 	}
-}
-
-void process_request()
-{
-	/*//TODO test parity
-	if((rec_data[28] & 0xf0) == 0x00)
-	{
-		
-	}*/
 }
 
 void delay_cs(int time)
@@ -367,6 +375,7 @@ void delay_cs(int time)
 void init_task_led(void)
 {
 	DDRB = 0x10;
+	PORTB |= 0x10;
 }
 
 void blink_led()
@@ -374,11 +383,14 @@ void blink_led()
 	int period_cs;
 	while(1)
 	{
-		period_cs = (period)/10;
-		PORTB &= 0xef;	//Blinking the LED at 1Hz
-		delay_cs(period_cs);
-		PORTB |= 0x10;
-		delay_cs(period_cs);
+		//if(blink)
+		{
+			period_cs = (period)/10;
+			PORTB &= 0xef;	//Blinking the LED at 1Hz
+			delay_cs(period_cs);
+			PORTB |= 0x10;
+			delay_cs(period_cs);
+		}
 	}
 }
 
