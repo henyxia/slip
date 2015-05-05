@@ -317,8 +317,8 @@ void receive_data()
 	int i=0;
 	while(1)
 	{
-		c = get_serial();
-		send_serial(c);
+		get_serial();
+		//send_serial(c);
 		cli();
 		do
 		{
@@ -335,9 +335,10 @@ void receive_data()
 		}
 		else
 		{
-			send_serial('a');
+			//send_serial('a');
 			if(c != -1)
-				while(get_serial() != -1);
+				while((UCSR0A & (1  << RXC0)) >> RXC0)
+						get_serial();
 			for(i=0; i<33; i++)
 				send_serial(rec_data[i]);
 		}
