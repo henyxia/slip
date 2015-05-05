@@ -110,7 +110,7 @@ typedef struct Tache {
 
 uint8_t data[32];
 int period=100; //x10-2 seconds
-//bool blink=0;
+bool blink=0;
 
 void send_packet(uint8_t p)
 {
@@ -341,7 +341,7 @@ void process_request(uint8_t * rec_data)
 		if((rec_data[29] == 0x00) && (rec_data[30] == 0x00) && (rec_data[31] == 0x00))
 		{
 			period = rec_data[32];
-			//blink = 1;
+			blink = 1;
 		}
 		else if((rec_data[30] == 0x00) && (rec_data[31] == 0x00) && (rec_data[32] == 0x00))
 		{
@@ -356,7 +356,7 @@ void receive_data()
 	char c=0x00;
 	while(1)
 	{
-		/*int i=0;
+		int i=0;
 		get_serial();
 		//send_serial(c);
 		cli();
@@ -376,16 +376,15 @@ void receive_data()
 		}
 		else
 		{
-			//send_serial('a');
 			
-			if(c != -1)
+			/*if(c != -1)
 				while((UCSR0A & (1  << RXC0)) >> RXC0)
-						get_serial();
+						get_serial();*/
 			for(i=0; i<33; i++)
 				send_serial(rec_data[i]);
-			//process_request(rec_data);
+			process_request(rec_data);
 		}
-		sei();*/
+		sei();
 	}
 }
 
@@ -409,7 +408,7 @@ void blink_led()
 	int period_cs;
 	while(1)
 	{
-		//if(blink)
+		if(blink)
 		{
 			period_cs = (period)/10;
 			PORTB &= 0xef;	//Blinking the LED at 1Hz
