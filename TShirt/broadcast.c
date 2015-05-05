@@ -200,6 +200,22 @@ int receive_packet()
 		}
 }
 
+bool detect_fall(uint8_t gyro_Y,int i)
+{
+	static uint8_t y_t0,y_t1;
+	if(i == 0)
+	{
+		y_t0=gyro_Y;
+		y_t1=0;
+	}	
+	y_t1 = y_t0;
+	y_t0 = gyro_Y;
+	if(y_t0 > y_t1)
+		return ((y_t0-y_t1) > 25);
+	else
+		return ((y_t1-y_t0) > 25);
+}
+
 void datagrammeIP(uint8_t data [],int x, int y, int z, int t)
 {
 	//IP
@@ -244,8 +260,8 @@ void datagrammeIP(uint8_t data [],int x, int y, int z, int t)
 
 
 	//UDP
-	data[20] = 0xA4; // Src port 42001
-	data[21] = 0x11; // Src port 42001
+	data[20] = 0x30; // Src port 42001
+	data[21] = 0x39; // Src port 42001
 	data[22] = 0x30; // Dest port 12345
 	data[23] = 0x39; // Dest port 12345
 	data[24] = 0x00; // Length 
@@ -286,10 +302,12 @@ void send_data()
 	uint8_t gyro_X,gyro_Y,gyro_Z,temp;
 	float Vout;
 	temp = 0;
+	bool fall;
+	int i=0;
 
 	while(1)
 	{
-		/*ad_init(0x00);
+		ad_init(0x00);
 		gyro_X = ad_sample();
 		ad_init(0x01);
 		gyro_Y = ad_sample();
@@ -299,9 +317,13 @@ void send_data()
 		temp = ad_sample();
 		Vout = temp*0.01953;
 		temp = (int)((Vout-0.5)*100);
-		datagrammeIP(data, gyro_X, gyro_Y, gyro_Z, temp);
-
-		int i;
+		fall=detect_fall(gyro_Y,i);
+		
+		if(!fall)
+			datagrammeIP(data, gyro_X, gyro_Y, gyro_Z, temp);
+		else
+			datagrammeIP(data, 0xff, 0xff, 0xff, 0xff);
+			
 		for(i=0; i<33; i++)
 		{
 			send_packet(data[i]);		
@@ -314,12 +336,16 @@ void send_data()
 void process_request(uint8_t * rec_data)
 {
 	//TODO test parity
-	if((rec_data[28] & 0xf0) == 0x30)
+	if((rec_data[28] & 0xf0) == 0x00)
 	{
-		if((rec_data[29] == 0x30) && (rec_data[30] == 0x30) && (rec_data[31] == 0x30))
+		if((rec_data[29] == 0x00) && (rec_data[30] == 0x00) && (rec_data[31] == 0x00))
 		{
 			period = rec_data[32];
 			//blink = 1;
+		}
+		else if((rec_data[30] == 0x00) && (rec_data[31] == 0x00) && (rec_data[32] == 0x00))
+		{
+			data[28] = (rec_data[28] & 0xf0);
 		}
 	}
 }
@@ -330,7 +356,7 @@ void receive_data()
 	char c=0x00;
 	while(1)
 	{
-		int i=0;
+		/*int i=0;
 		get_serial();
 		//send_serial(c);
 		cli();
@@ -351,15 +377,15 @@ void receive_data()
 		else
 		{
 			//send_serial('a');
-			/*
+			
 			if(c != -1)
 				while((UCSR0A & (1  << RXC0)) >> RXC0)
-						get_serial();*/
+						get_serial();
 			for(i=0; i<33; i++)
 				send_serial(rec_data[i]);
 			//process_request(rec_data);
 		}
-		sei();
+		sei();*/
 	}
 }
 
