@@ -3,11 +3,13 @@
 #include <unistd.h>
 #include <libcom.h>
 
-#define MAX_TEAM 10
+#define MAX_TEAM	10
+#define	CMD_SIZE	5
 
 int main(void)
 {
-	unsigned char data[] = "azert";
+	unsigned char data[CMD_SIZE] = "azert";
+	char stop[10];
 	int teamOld;
 	int teamNew;
 	printf("Do you want to change the team number ?\n");
@@ -29,7 +31,13 @@ int main(void)
 	data[2] = 0;
 	data[3] = 0;
 	data[4] = 0;
-	envoiMessage(54321, data, sizeof(data));
+
+	do
+	{
+		printf("Stop ? y/N");
+		scanf("%c", &stop[0]);
+		envoiMessageUnicast(54321, 0xAC1A4FC9, data, sizeof(data));
+	}while(stop[0]!='y');
 
 	return 0;
 }
